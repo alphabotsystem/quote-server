@@ -1,0 +1,21 @@
+FROM python:latest
+
+# Make a directory for the service
+WORKDIR /usr/src/quote-server
+
+# Install dependencies
+COPY ./services/quotes/build/requirements.txt ./services/quotes/entrypoint.sh ./
+RUN pip install -r ./requirements.txt
+
+RUN mkdir ./dependencies
+COPY ./libraries/parser ./dependencies/parser
+RUN pip install ./dependencies/parser
+
+# Copy source code
+COPY ./services/quotes/app ./app
+
+# Pass required credentials
+ENV GOOGLE_APPLICATION_CREDENTIALS="/run/secrets/google-cloud-auth/key"
+
+# Run
+ENTRYPOINT ["bash", "./entrypoint.sh"]
