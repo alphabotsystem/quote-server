@@ -4,18 +4,18 @@ FROM python:latest
 WORKDIR /usr/src/quote-server
 
 # Install dependencies
-COPY ./services/quotes/build/requirements.txt ./services/quotes/entrypoint.sh ./
+COPY ./build/requirements.txt ./
 RUN pip install -r ./requirements.txt
 
-RUN mkdir ./dependencies
-COPY ./libraries/parser ./dependencies/parser
+RUN git clone https://github.com/alphabotsystem/dependencies.git && cd ./dependencies && git checkout v1.0
 RUN pip install ./dependencies/parser
+RUN rm -r ./dependencies
 
 # Copy source code
-COPY ./services/quotes/app ./app
+COPY ./app ./app
 
 # Pass required credentials
 ENV GOOGLE_APPLICATION_CREDENTIALS="/run/secrets/google-cloud-auth/key"
 
 # Run
-ENTRYPOINT ["bash", "./entrypoint.sh"]
+ENTRYPOINT ["python", "app/quote_server.py"]

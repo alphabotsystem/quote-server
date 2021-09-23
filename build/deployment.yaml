@@ -17,15 +17,9 @@ spec:
     spec:
       containers:
       - name: quote-server
-        image: gcr.io/nlc-bot-36685/alpha-quote-server
+        image: europe-west4-docker.pkg.dev/nlc-bot-36685/alpha-bot/quote-server
         imagePullPolicy: Always
-        env:
-          - name: PRODUCTION_MODE
-            value: "1"
         volumeMounts:
-          - name: alpha-service-keys
-            mountPath: /run/secrets/alpha-service
-            readOnly: true
           - name: google-cloud-auth
             mountPath: /run/secrets/google-cloud-auth
             readOnly: true
@@ -35,15 +29,17 @@ spec:
             cpu: "15m"
           limits:
             memory: "560Mi"
+        env:
+          - name: PRODUCTION_MODE
+            value: "1"
+          - name: IEXC_KEY
+            valueFrom:
+              secretKeyRef:
+                name: alpha-credentials
+                key: IEXC_KEY
         ports:
           - containerPort: 6900
       volumes:
-        - name: alpha-service-keys
-          secret:
-            secretName: alpha-service-keys
-            items:
-              - key: credentials
-                path: key
         - name: google-cloud-auth
           secret:
             secretName: google-cloud-auth
