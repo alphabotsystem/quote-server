@@ -10,7 +10,6 @@ from assets import static_storage
 class CoinGecko(AbstractProvider):
 	name = "CoinGecko"
 	connection = CoinGeckoAPI()
-	lastBitcoinQuote = 0
 
 	@classmethod
 	def _request_quote(cls, request, ticker):
@@ -47,7 +46,5 @@ class CoinGecko(AbstractProvider):
 		if ticker.get("quote") != "USD":
 			payload["quoteConvertedPrice"] = "≈ ${:,.6f}".format(rawData["market_data"]["current_price"]["usd"])
 			payload["quoteConvertedVolume"] = "≈ ${:,.4f}".format(rawData["market_data"]["total_volume"]["usd"])
-		elif ticker.get("id") == "BTCUSD":
-			CoinGecko.lastBitcoinQuote = payload["raw"]["quotePrice"][0]
 
 		return [payload, ""]

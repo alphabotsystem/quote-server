@@ -9,7 +9,6 @@ from PIL import Image
 
 from TickerParserPy import Exchange, TickerParserSync as TickerParser
 from components.abstract import AbstractProvider
-from components.coingecko import CoinGecko
 from assets import static_storage
 
 
@@ -55,9 +54,6 @@ class CCXT(AbstractProvider):
 				"timestamp": time()
 			}
 		}
-		if ticker.get("quote") == "BTC":
-			payload["quoteConvertedPrice"] = "≈ ${:,.6f}".format(price[0] * CoinGecko.lastBitcoinQuote)
-			payload["quoteConvertedVolume"] = "≈ ${:,.4f}".format(volume * CoinGecko.lastBitcoinQuote)
 
 		return [payload, ""]
 

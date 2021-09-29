@@ -27,11 +27,6 @@ class QuoteProcessor(object):
 
 		self.logging = ErrorReportingClient(service="quote_server")
 
-		try:
-			rawData = CoinGecko.connection.get_coin_by_id(id="bitcoin", localization="false", tickers=False, market_data=True, community_data=False, developer_data=False)
-			CoinGecko.lastBitcoinQuote = rawData["market_data"]["current_price"]["usd"]
-		except: pass
-
 		self.context = Context.instance()
 		self.socket = self.context.socket(ROUTER)
 		self.socket.bind("tcp://*:6900")
