@@ -2,7 +2,7 @@ name: Build and Deploy to GKE
 
 on:
   release:
-    types: [created, published]
+    types: [created]
 
 env:
   PROJECT_ID: nlc-bot-36685
