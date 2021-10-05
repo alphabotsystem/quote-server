@@ -33,7 +33,7 @@ class QuoteProcessor(object):
 
 		print("[Startup]: Quote Server is online")
 
-	def exit_gracefully(self):
+	def exit_gracefully(self, signum, frame):
 		print("[Startup]: Quote Server is exiting")
 		self.socket.close()
 		self.isServiceAvailable = False
@@ -51,6 +51,7 @@ class QuoteProcessor(object):
 					continue
 
 				if service == b"quote":
+					print(request)
 					response = self.request_quote(request, clientId)
 				elif service == b"depth":
 					response = self.request_depth(request, clientId)
