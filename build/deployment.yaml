@@ -25,10 +25,8 @@ spec:
             readOnly: true
         resources:
           requests:
-            memory: "280Mi"
+            memory: "147Mi"
             cpu: "15m"
-          limits:
-            memory: "560Mi"
         env:
           - name: PRODUCTION_MODE
             value: "1"
