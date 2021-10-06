@@ -51,7 +51,6 @@ class QuoteProcessor(object):
 					continue
 
 				if service == b"quote":
-					if clientId == b"discord_alpha": print(request)
 					response = self.request_quote(request, clientId)
 				elif service == b"depth":
 					response = self.request_depth(request, clientId)
