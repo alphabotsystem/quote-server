@@ -2,7 +2,7 @@ from time import time
 
 from pycoingecko import CoinGeckoAPI
 
-from TickerParserPy import TickerParserSync as TickerParser
+from TickerParser import TickerParserSync as TickerParser
 from components.abstract import AbstractProvider
 from assets import static_storage
 

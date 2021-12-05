@@ -2,7 +2,7 @@ from time import time
 from zmq import Context, Poller, ROUTER, REQ, LINGER, POLLIN
 from orjson import dumps, loads
 
-from TickerParserPy import TickerParserSync as TickerParser
+from TickerParser import TickerParserSync as TickerParser
 from components.abstract import AbstractProvider
 from assets import static_storage
 

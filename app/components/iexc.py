@@ -7,7 +7,7 @@ from requests import get
 from PIL import Image
 from iexfinance.stocks import Stock
 
-from TickerParserPy import Exchange
+from TickerParser import Exchange
 from components.abstract import AbstractProvider
 from assets import static_storage
 
