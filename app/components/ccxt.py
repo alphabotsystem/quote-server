@@ -33,7 +33,6 @@ class CCXT(AbstractProvider):
 			return [{}, ""]
 
 		price = [rawData[-1][4], rawData[0][1]] if len(rawData) < candleOffset else [rawData[-1][4], rawData[-candleOffset][1]]
-		if ticker.get("isReversed"): price = [1 / price[0], 1 / price[1]]
 		volume = None if price[0] is None else sum([candle[5] for candle in rawData if int(candle[0] / 1000) >= int(exchange.properties.milliseconds() / 1000) - 86400]) / (price[0] if exchange.id == "bitmex" else 1)
 		priceChange = 0 if tf == "1m" or price[1] == 0 else (price[0] / price[1]) * 100 - 100
 		coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")

@@ -23,10 +23,8 @@ class CoinGecko(AbstractProvider):
 		if ticker.get("quote").lower() not in rawData["market_data"]["current_price"] or ticker.get("quote").lower() not in rawData["market_data"]["total_volume"]: return [{}, "Requested price for `{}` is not available.".format(ticker.get("name"))]
 
 		price = rawData["market_data"]["current_price"][ticker.get("quote").lower()]
-		if ticker.get("isReversed"): price = 1 / price
 		volume = rawData["market_data"]["total_volume"][ticker.get("quote").lower()]
 		priceChange = rawData["market_data"]["price_change_percentage_24h_in_currency"][ticker.get("quote").lower()] if ticker.get("quote").lower() in rawData["market_data"]["price_change_percentage_24h_in_currency"] else 0
-		if ticker.get("isReversed"): priceChange = (1 / (priceChange / 100 + 1) - 1) * 100
 
 		payload = {
 			"quotePrice": "{:,.12f}".format(price).rstrip('0').rstrip('.') + " " + ticker.get("quote"),

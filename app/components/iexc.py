@@ -52,11 +52,10 @@ class IEXC(AbstractProvider):
 
 		latestPrice = rawData["delayedPrice"] if rawData["latestPrice"] is None else rawData["latestPrice"]
 		price = float(latestPrice if "isUSMarketOpen" not in rawData or rawData["isUSMarketOpen"] or "extendedPrice" not in rawData or rawData["extendedPrice"] is None else rawData["extendedPrice"])
-		if ticker.get("isReversed"): price = 1 / price
-		priceChange = ((1 / float(rawData["change"]) if ticker.get("isReversed") and float(rawData["change"]) != 0 else float(rawData["change"])) / price * 100) if "change" in rawData and rawData["change"] is not None else 0
+		priceChange = (float(rawData["change"]) / price * 100) if "change" in rawData and rawData["change"] is not None else 0
 
 		payload = {
-			"quotePrice": "{:,.10f}".format(price).rstrip('0').rstrip('.') + ("" if ticker.get("isReversed") else (" USD" if ticker.get("quote") is None else (" " + ticker.get("quote")))),
+			"quotePrice": "{:,.10f}".format(price).rstrip('0').rstrip('.') + (" USD" if ticker.get("quote") is None else (" " + ticker.get("quote"))),
 			"title": ticker.get("name"),
 			"change": "{:+.2f} %".format(priceChange),
 			"thumbnailUrl": coinThumbnail,
@@ -89,7 +88,6 @@ class IEXC(AbstractProvider):
 
 		price = rawData[0]["rate"]
 		if price is None: return [{}, ""]
-		if ticker.get("isReversed"): price = 1 / price
 
 		payload = {
 			"quotePrice": "{:,.5f} {}".format(price, ticker.get("quote")),
