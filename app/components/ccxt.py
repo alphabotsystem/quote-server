@@ -7,6 +7,7 @@ from base64 import decodebytes, b64encode
 
 from PIL import Image
 
+from TickerParser import Exchange
 from components.abstract import AbstractProvider
 from components.coingecko import CoinGecko
 from assets import static_storage
