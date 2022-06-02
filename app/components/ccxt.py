@@ -46,7 +46,7 @@ class CCXT(AbstractProvider):
 			"change": "{:+.2f} %".format(priceChange),
 			"thumbnailUrl": coinThumbnail,
 			"messageColor": "amber" if priceChange == 0 else ("green" if priceChange > 0 else "red"),
-			"sourceText": "Data from {}".format(exchange.name),
+			"sourceText": f"Data from {exchange.name}",
 			"platform": CCXT.name,
 			"raw": {
 				"quotePrice": [price[0]] if tf == "1m" else price[:1],
@@ -83,7 +83,7 @@ class CCXT(AbstractProvider):
 		imageData = b64encode(imageBuffer.getvalue())
 		imageBuffer.close()
 		# if uploadMode:
-		# 	bucket.blob("uploads/{}.png".format(int(time() * 1000))).upload_from_string(decodebytes(imageData))
+		# 	bucket.blob(f"uploads/{int(time() * 1000)}.png").upload_from_string(decodebytes(imageData))
 
 		payload = {
 			"data": imageData.decode(),
@@ -104,7 +104,7 @@ class CCXT(AbstractProvider):
 		if action == "funding":
 			if exchange.id in ["bitmex"]:
 				try: rawData = exchange.properties.public_get_instrument({"symbol": ticker.get("id")})[0]
-				except: return [{}, "Requested funding data for `{}` is not available.".format(ticker.get("name"))]
+				except: return [{}, f"Requested funding data for `{ticker.get('name')}` is not available."]
 
 				if rawData["fundingTimestamp"] is not None:
 					fundingDate = datetime.strptime(rawData["fundingTimestamp"], "%Y-%m-%dT%H:%M:00.000Z").replace(tzinfo=utc)
@@ -118,14 +118,14 @@ class CCXT(AbstractProvider):
 				hours1, seconds1 = divmod(deltaFunding.days * 86400 + deltaFunding.seconds, 3600)
 				minutes1 = int(seconds1 / 60)
 				hoursFunding = "{:d} {} ".format(hours1, "hours" if hours1 > 1 else "hour") if hours1 > 0 else ""
-				minutesFunding = "{:d} {}".format(minutes1 if hours1 > 0 or minutes1 > 0 else seconds1, "{}".format("minute" if minutes1 == 1 else "minutes") if hours1 > 0 or minutes1 > 0 else ("second" if seconds1 == 1 else "seconds"))
-				deltaFundingText = "{}{}".format(hoursFunding, minutesFunding)
+				minutesFunding = "{:d} {}".format(minutes1 if hours1 > 0 or minutes1 > 0 else seconds1, ("minute" if minutes1 == 1 else "minutes") if hours1 > 0 or minutes1 > 0 else ("second" if seconds1 == 1 else "seconds"))
+				deltaFundingText = f"{hoursFunding}{minutesFunding}"
 
 				hours2, seconds2 = divmod(deltaIndicative.days * 86400 + deltaIndicative.seconds, 3600)
 				minutes2 = int(seconds2 / 60)
 				hoursIndicative = "{:d} {} ".format(hours2, "hours" if hours2 > 1 else "hour") if hours2 > 0 else ""
-				minutesIndicative = "{:d} {}".format(minutes2 if hours2 > 0 or minutes2 > 0 else seconds2, "{}".format("minute" if minutes2 == 1 else "minutes") if hours2 > 0 or minutes2 > 0 else ("second" if seconds2 == 1 else "seconds"))
-				deltaIndicativeText = "{}{}".format(hoursIndicative, minutesIndicative)
+				minutesIndicative = "{:d} {}".format(minutes2 if hours2 > 0 or minutes2 > 0 else seconds2, ("minute" if minutes2 == 1 else "minutes") if hours2 > 0 or minutes2 > 0 else ("second" if seconds2 == 1 else "seconds"))
+				deltaIndicativeText = f"{hoursIndicative}{minutesIndicative}"
 
 				fundingRate = float(rawData["fundingRate"]) * 100
 				predictedFundingRate = float(rawData["indicativeFundingRate"]) * 100
@@ -137,10 +137,10 @@ class CCXT(AbstractProvider):
 					"quotePrice": "Funding Rate: {:+.4f} %".format(fundingRate),
 					"quoteConvertedPrice": "Predicted Rate: {:+.4f} % *(in {})*".format(predictedFundingRate, deltaIndicativeText),
 					"title": ticker.get("name"),
-					"change": "in {}".format(deltaFundingText),
+					"change": f"in {deltaFundingText}",
 					"thumbnailUrl": coinThumbnail,
 					"messageColor": "yellow" if averageFundingRate == 0.01 else ("light green" if averageFundingRate < 0.01 else "deep orange"),
-					"sourceText": "Funding on {}".format(exchange.name),
+					"sourceText": f"Funding on {exchange.name}",
 					"platform": CCXT.name,
 					"raw": {
 						"quotePrice": [fundingRate, predictedFundingRate],
@@ -152,7 +152,7 @@ class CCXT(AbstractProvider):
 		elif action == "oi":
 			if exchange.id in ["bitmex"]:
 				try: rawData = exchange.properties.public_get_instrument({"symbol": ticker.get("id")})[0]
-				except: return [{}, "Requested open interest data for `{}` is not available.".format(ticker.get("name"))]
+				except: return [{}, f"Requested open interest data for `{ticker.get('name')}` is not available."]
 
 				coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")
 
@@ -162,7 +162,7 @@ class CCXT(AbstractProvider):
 					"title": ticker.get("name"),
 					"thumbnailUrl": coinThumbnail,
 					"messageColor": "deep purple",
-					"sourceText": "Open interest on {}".format(exchange.name),
+					"sourceText": f"Open interest on {exchange.name}",
 					"platform": CCXT.name,
 					"raw": {
 						"quotePrice": [float(rawData["openInterest"]), float(rawData["openValue"]) / 100000000],
@@ -174,8 +174,8 @@ class CCXT(AbstractProvider):
 		elif action == "ls":
 			if exchange.id in ["bitfinex2"]:
 				try:
-					longs = exchange.properties.publicGetStats1KeySizeSymbolLongLast({"key": "pos.size", "size": "1m", "symbol": "t{}".format(ticker.get("id")), "side": "long", "section": "last"})
-					shorts = exchange.properties.publicGetStats1KeySizeSymbolShortLast({"key": "pos.size", "size": "1m", "symbol": "t{}".format(ticker.get("id")), "side": "long", "section": "last"})
+					longs = exchange.properties.publicGetStats1KeySizeSymbolLongLast({"key": "pos.size", "size": "1m", "symbol": f"t{ticker.get('id')}", "side": "long", "section": "last"})
+					shorts = exchange.properties.publicGetStats1KeySizeSymbolShortLast({"key": "pos.size", "size": "1m", "symbol": f"t{ticker.get('id')}", "side": "long", "section": "last"})
 					ratio = longs[1] / (longs[1] + shorts[1]) * 100
 				except:
 					return [{}, ""]
@@ -185,10 +185,10 @@ class CCXT(AbstractProvider):
 				payload = {
 					"quotePrice": "{:.1f} % longs / {:.1f} % shorts".format(ratio, 100 - ratio),
 					"title": ticker.get("name"),
-					"change": "in {}".format(deltaFundingText),
+					"change": f"in {deltaFundingText}",
 					"thumbnailUrl": coinThumbnail,
 					"messageColor": "deep purple",
-					"sourceText": "Longs/shorts on {}".format(exchange.name),
+					"sourceText": f"Longs/shorts on {exchange.name}",
 					"platform": CCXT.name,
 					"raw": {
 						"quotePrice": [longs[1], shorts[1]],
@@ -199,8 +199,8 @@ class CCXT(AbstractProvider):
 			return [{}, "Longs and shorts data is only available on Bitfinex."]
 		elif action == "dom":
 			try: rawData = CoinGecko.connection.get_global()
-			except: return [{}, "Requested dominance data for `{}` is not available.".format(ticker.get("name"))]
-			if ticker.get("base").lower() not in rawData["market_cap_percentage"]: return [{}, "Dominance for {} does not exist.".format(ticker.get("base"))]
+			except: return [{}, f"Requested dominance data for `{ticker.get('name')}` is not available."]
+			if ticker.get("base").lower() not in rawData["market_cap_percentage"]: return [{}, f"Dominance for {ticker.get('base')} does not exist."]
 			coinDominance = rawData["market_cap_percentage"][ticker.get("base").lower()]
 
 			coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")

@@ -42,7 +42,7 @@ class IEXC(AbstractProvider):
 		try:
 			stock = Stock(ticker.get("symbol"), token=environ["IEXC_KEY"])
 			rawData = stock.get_quote().loc[ticker.get("symbol")]
-			if ticker.get("quote") is None and exchange is not None: return [{}, "Price for `{}` is not available on {}.".format(ticker.get("name"), exchange.get("name"))]
+			if ticker.get("quote") is None and exchange is not None: return [{}, f"Price for `{ticker.get('name')}` is not available on {exchange.get('name')}."]
 			if rawData is None or (rawData["latestPrice"] is None and rawData["delayedPrice"] is None): return [{}, ""]
 		except:
 			return [{}, ""]
@@ -81,7 +81,7 @@ class IEXC(AbstractProvider):
 
 		try:
 			if exchange is not None: return [{}, ""]
-			rawData = get("https://cloud.iexapis.com/stable/fx/latest?symbols={}&token={}".format(ticker.get("id"), environ["IEXC_KEY"])).json()
+			rawData = get(f"https://cloud.iexapis.com/stable/fx/latest?symbols={ticker.get('id')}&token={environ['IEXC_KEY']}").json()
 			if rawData is None or type(rawData) is not list or len(rawData) == 0: return [{}, ""]
 		except:
 			return [{}, ""]
@@ -115,7 +115,7 @@ class IEXC(AbstractProvider):
 			stock = Stock(ticker.get("symbol"), token=environ["IEXC_KEY"])
 			depthData = stock.get_book()[ticker.get("symbol")]
 			rawData = stock.get_quote().loc[ticker.get("symbol")]
-			if ticker.get("quote") is None and exchange is not None: return [{}, "Orderbook visualization for `{}` is not available on {}.".format(ticker.get("name"), exchange.get("name"))]
+			if ticker.get("quote") is None and exchange is not None: return [{}, f"Orderbook visualization for `{ticker.get('name')}` is not available on {exchange.get('name')}."]
 			lastPrice = (depthData["bids"][0]["price"] + depthData["asks"][0]["price"]) / 2
 			depthData = {
 				"bids": [[e.get("price"), e.get("size")] for e in depthData["bids"] if e.get("price") >= lastPrice * 0.75],
@@ -134,7 +134,7 @@ class IEXC(AbstractProvider):
 		imageData = b64encode(imageBuffer.getvalue())
 		imageBuffer.close()
 		# if uploadMode:
-		# 	bucket.blob("uploads/{}.png".format(int(time() * 1000))).upload_from_string(decodebytes(imageData))
+		# 	bucket.blob(f"uploads/{int(time() * 1000)}.png").upload_from_string(decodebytes(imageData))
 
 		payload = {
 			"data": imageData.decode(),

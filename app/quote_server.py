@@ -86,7 +86,7 @@ class QuoteProcessor(object):
 
 			if bool(payload):
 				if clientId in [b"discord_alpha"] and currentRequest["ticker"].get("base") is not None:
-					database.document("dataserver/statistics/{}/{}".format(currentRequest.get("parserBias"), int(time() // 3600 * 3600))).set({
+					database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
 						currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
 					}, merge=True)
 				return [dumps(payload), updatedQuoteMessage.encode()]
@@ -108,7 +108,7 @@ class QuoteProcessor(object):
 
 			if bool(payload):
 				if clientId in [b"discord_alpha"] and currentRequest["ticker"].get("base") is not None:
-					database.document("dataserver/statistics/{}/{}".format(currentRequest.get("parserBias"), int(time() // 3600 * 3600))).set({
+					database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
 						currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
 					}, merge=True)
 				return [dumps(payload), updatedQuoteMessage.encode()]

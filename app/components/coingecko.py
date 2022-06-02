@@ -19,7 +19,7 @@ class CoinGecko(AbstractProvider):
 
 		coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")
 
-		if ticker.get("quote").lower() not in rawData["market_data"]["current_price"] or ticker.get("quote").lower() not in rawData["market_data"]["total_volume"]: return [{}, "Requested price for `{}` is not available.".format(ticker.get("name"))]
+		if ticker.get("quote").lower() not in rawData["market_data"]["current_price"] or ticker.get("quote").lower() not in rawData["market_data"]["total_volume"]: return [{}, f"Requested price for `{ticker.get('name')}` is not available."]
 
 		price = rawData["market_data"]["current_price"][ticker.get("quote").lower()]
 		volume = rawData["market_data"]["total_volume"][ticker.get("quote").lower()]
