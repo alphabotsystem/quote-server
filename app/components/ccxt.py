@@ -121,7 +121,7 @@ class CCXT(AbstractProvider):
 					"quotePrice": "Funding Rate: {:+.4f} %".format(fundingRate),
 					"quoteConvertedPrice": "Predicted Rate: {:+.4f} %".format(predictedFundingRate),
 					"title": ticker.get("name"),
-					"change": f"<t:{datetime.timestamp(fundingDate)}:R>",
+					"change": f"<t:{int(datetime.timestamp(fundingDate))}:R>",
 					"thumbnailUrl": coinThumbnail,
 					"messageColor": "yellow" if averageFundingRate == 0.01 else ("light green" if averageFundingRate < 0.01 else "deep orange"),
 					"sourceText": f"Funding on {exchange.name}",
