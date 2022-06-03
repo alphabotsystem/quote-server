@@ -110,22 +110,6 @@ class CCXT(AbstractProvider):
 					fundingDate = datetime.strptime(rawData["fundingTimestamp"], "%Y-%m-%dT%H:%M:00.000Z").replace(tzinfo=utc)
 				else:
 					fundingDate = datetime.now().replace(tzinfo=utc)
-				indicativeFundingTimestamp = datetime.timestamp(fundingDate) + 28800
-				indicativeFundingDate = datetime.utcfromtimestamp(indicativeFundingTimestamp).replace(tzinfo=utc)
-				deltaFunding = fundingDate - datetime.now().astimezone(utc)
-				deltaIndicative = indicativeFundingDate - datetime.now().astimezone(utc)
-
-				hours1, seconds1 = divmod(deltaFunding.days * 86400 + deltaFunding.seconds, 3600)
-				minutes1 = int(seconds1 / 60)
-				hoursFunding = "{:d} {} ".format(hours1, "hours" if hours1 > 1 else "hour") if hours1 > 0 else ""
-				minutesFunding = "{:d} {}".format(minutes1 if hours1 > 0 or minutes1 > 0 else seconds1, ("minute" if minutes1 == 1 else "minutes") if hours1 > 0 or minutes1 > 0 else ("second" if seconds1 == 1 else "seconds"))
-				deltaFundingText = f"{hoursFunding}{minutesFunding}"
-
-				hours2, seconds2 = divmod(deltaIndicative.days * 86400 + deltaIndicative.seconds, 3600)
-				minutes2 = int(seconds2 / 60)
-				hoursIndicative = "{:d} {} ".format(hours2, "hours" if hours2 > 1 else "hour") if hours2 > 0 else ""
-				minutesIndicative = "{:d} {}".format(minutes2 if hours2 > 0 or minutes2 > 0 else seconds2, ("minute" if minutes2 == 1 else "minutes") if hours2 > 0 or minutes2 > 0 else ("second" if seconds2 == 1 else "seconds"))
-				deltaIndicativeText = f"{hoursIndicative}{minutesIndicative}"
 
 				fundingRate = float(rawData["fundingRate"]) * 100
 				predictedFundingRate = float(rawData["indicativeFundingRate"]) * 100
@@ -135,9 +119,9 @@ class CCXT(AbstractProvider):
 
 				payload = {
 					"quotePrice": "Funding Rate: {:+.4f} %".format(fundingRate),
-					"quoteConvertedPrice": "Predicted Rate: {:+.4f} % *(in {})*".format(predictedFundingRate, deltaIndicativeText),
+					"quoteConvertedPrice": "Predicted Rate: {:+.4f} %".format(predictedFundingRate),
 					"title": ticker.get("name"),
-					"change": f"in {deltaFundingText}",
+					"change": f"<t:{datetime.timestamp(fundingDate)}:R>",
 					"thumbnailUrl": coinThumbnail,
 					"messageColor": "yellow" if averageFundingRate == 0.01 else ("light green" if averageFundingRate < 0.01 else "deep orange"),
 					"sourceText": f"Funding on {exchange.name}",
