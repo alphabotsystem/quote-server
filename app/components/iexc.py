@@ -133,8 +133,8 @@ class IEXC(AbstractProvider):
 		chartImage.save(imageBuffer, format="png")
 		imageData = b64encode(imageBuffer.getvalue())
 		imageBuffer.close()
-		# if uploadMode:
-		# 	bucket.blob(f"uploads/{int(time() * 1000)}.png").upload_from_string(decodebytes(imageData))
+		if uploadMode:
+			bucket.blob(f"uploads/{int(time() * 1000)}.png").upload_from_string(decodebytes(imageData))
 
 		payload = {
 			"data": imageData.decode(),
