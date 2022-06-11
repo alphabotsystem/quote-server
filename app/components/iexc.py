@@ -60,7 +60,7 @@ class IEXC(AbstractProvider):
 			"change": "{:+.2f} %".format(priceChange),
 			"thumbnailUrl": coinThumbnail,
 			"messageColor": "amber" if priceChange == 0 else ("green" if priceChange > 0 else "red"),
-			"sourceText": "Data provided by IEX Cloud",
+			"sourceText": f"Price on {exchange.get('name')}",
 			"platform": "IEXC",
 			"raw": {
 				"quotePrice": [price],
