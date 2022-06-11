@@ -42,7 +42,7 @@ class IEXC(AbstractProvider):
 		try:
 			stock = Stock(ticker.get("symbol"), token=environ["IEXC_KEY"])
 			rawData = stock.get_quote().loc[ticker.get("symbol")]
-			if ticker.get("quote") is None and exchange is not None: return [{}, f"Price for `{ticker.get('name')}` is not available on {exchange.get('name')}."]
+			if ticker.get("quote") is None and exchange is not None: return [{}, f"Price for `{ticker.get('name')}` is not available on {exchange.name}."]
 			if rawData is None or (rawData["latestPrice"] is None and rawData["delayedPrice"] is None): return [{}, ""]
 		except:
 			return [{}, ""]
@@ -60,7 +60,7 @@ class IEXC(AbstractProvider):
 			"change": "{:+.2f} %".format(priceChange),
 			"thumbnailUrl": coinThumbnail,
 			"messageColor": "amber" if priceChange == 0 else ("green" if priceChange > 0 else "red"),
-			"sourceText": f"Price on {exchange.get('name')}",
+			"sourceText": f"Price on {exchange.name}",
 			"platform": "IEXC",
 			"raw": {
 				"quotePrice": [price],
