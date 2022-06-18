@@ -25,8 +25,13 @@ class CoinGecko(AbstractProvider):
 		volume = rawData["market_data"]["total_volume"][ticker.get("quote").lower()]
 		priceChange = rawData["market_data"]["price_change_percentage_24h_in_currency"][ticker.get("quote").lower()] if ticker.get("quote").lower() in rawData["market_data"]["price_change_percentage_24h_in_currency"] else 0
 
+		priceText = "{:,.8g}".format(price)
+		if price < 1 and "e-" in priceText:
+			number, exponent = priceText.split("e-")
+			priceText = ("{:,.%df}" % (len(number) + int(exponent) - 2)).format(price).rstrip('0')
+
 		payload = {
-			"quotePrice": "{:,.12f}".format(price).rstrip('0').rstrip('.') + " " + ticker.get("quote"),
+			"quotePrice": priceText + " " + ticker.get("quote"),
 			"quoteVolume": "{:,.4f}".format(volume).rstrip('0').rstrip('.') + " " + ticker.get("base"),
 			"title": ticker.get("name"),
 			"change": "{:+.2f} %".format(priceChange),
