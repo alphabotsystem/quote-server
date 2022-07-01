@@ -39,6 +39,7 @@ class QuoteProcessor(object):
 		self.isServiceAvailable = False
 
 	def run(self):
+		request = None
 		while self.isServiceAvailable:
 			try:
 				response = [dumps({}),  b""]
