@@ -88,7 +88,6 @@ class IEXC(AbstractProvider):
 
 		price = rawData[0]["rate"]
 		if price is None: return [{}, ""]
-		price = 1 / price
 
 		payload = {
 			"quotePrice": "{:,.5f} {}".format(price, ticker.get("quote")),
