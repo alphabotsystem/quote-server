@@ -16,7 +16,7 @@ class Alternativeme(AbstractProvider):
 		payload = {
 			"quotePrice": fearGreedIndex,
 			"quoteConvertedPrice": f"≈ {r['data'][0]['value_classification'].lower()}",
-			"title": "Fear & Greed Index",
+			"title": "Crypto market Fear & Greed Index",
 			"change": "{:+.0f} since yesterday".format(fearGreedIndex - int(r["data"][1]["value"])),
 			"thumbnailUrl": static_storage.icon,
 			"messageColor": "deep purple",

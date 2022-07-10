@@ -10,6 +10,7 @@ from google.cloud.firestore import ArrayUnion
 from google.cloud.error_reporting import Client as ErrorReportingClient
 
 from components.alternativeme import Alternativeme
+from components.cnnbusiness import CNNBusiness
 from components.ccxt import CCXT
 from components.coingecko import CoinGecko
 from components.iexc import IEXC
@@ -74,6 +75,8 @@ class QuoteProcessor(object):
 
 			if platform == "Alternative.me":
 				payload, updatedQuoteMessage = Alternativeme.request_quote(currentRequest)
+			elif platform == "CNN Business":
+				payload, updatedQuoteMessage = CNNBusiness.request_quote(currentRequest)
 			elif platform == "CoinGecko":
 				payload, updatedQuoteMessage = CoinGecko.request_quote(currentRequest)
 			elif platform == "CCXT":
