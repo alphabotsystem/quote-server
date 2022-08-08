@@ -28,9 +28,9 @@ class Serum(AbstractProvider):
 				rawData = loads(response)
 			else:
 				socket.close()
-				return [{}, ""]
+				return None, None
 		except:
-			return [{}, ""]
+			return None, None
 
 		coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")
 
@@ -56,4 +56,4 @@ class Serum(AbstractProvider):
 			}
 		}
 
-		return [payload, ""]
+		return payload, None

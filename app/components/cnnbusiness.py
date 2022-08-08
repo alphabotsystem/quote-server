@@ -35,4 +35,4 @@ class CNNBusiness(AbstractProvider):
 				"timestamp": time()
 			}
 		}
-		return [payload, ""]
+		return payload, None

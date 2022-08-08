@@ -16,11 +16,11 @@ class CoinGecko(AbstractProvider):
 		try:
 			rawData = CoinGecko.connection.get_coin_by_id(id=ticker.get("symbol"), localization="false", tickers=False, market_data=True, community_data=False, developer_data=False)
 		except:
-			return [{}, ""]
+			return None, None
 
 		coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")
 
-		if ticker.get("quote").lower() not in rawData["market_data"]["current_price"] or ticker.get("quote").lower() not in rawData["market_data"]["total_volume"]: return [{}, f"Requested price for `{ticker.get('name')}` is not available."]
+		if ticker.get("quote").lower() not in rawData["market_data"]["current_price"] or ticker.get("quote").lower() not in rawData["market_data"]["total_volume"]: return None, f"Requested price for `{ticker.get('name')}` is not available."
 
 		price = rawData["market_data"]["current_price"][ticker.get("quote").lower()]
 		volume = rawData["market_data"]["total_volume"][ticker.get("quote").lower()]
@@ -50,7 +50,7 @@ class CoinGecko(AbstractProvider):
 			payload["quoteConvertedPrice"] = "≈ ${:,.6f}".format(rawData["market_data"]["current_price"]["usd"])
 			payload["quoteConvertedVolume"] = "≈ ${:,.4f}".format(rawData["market_data"]["total_volume"]["usd"])
 
-		return [payload, ""]
+		return payload, None
 
 	@classmethod
 	def request_details(cls, request):
@@ -60,7 +60,7 @@ class CoinGecko(AbstractProvider):
 			assetData = CoinGecko.connection.get_coin_by_id(id=ticker.get("symbol"), localization="false", tickers=False, market_data=True, community_data=True, developer_data=True)
 			historicData = CoinGecko.connection.get_coin_ohlc_by_id(id=ticker.get("symbol"), vs_currency="usd", days=365)
 		except:
-			return [{}, ""]
+			return None, None
 
 		description = markdownify(assetData["description"].get("en", "No description"))
 		descriptionParagraphs = description.split("\r\n\r\n")
@@ -108,4 +108,4 @@ class CoinGecko(AbstractProvider):
 		if len(highs) != 0: payload["price"]["1y high"] = max(highs)
 		if len(lows) != 0: payload["price"]["1y low"] = min(lows)
 
-		return [payload, ""]
+		return payload, None

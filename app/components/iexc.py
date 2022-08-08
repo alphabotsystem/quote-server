@@ -20,7 +20,7 @@ class IEXC(AbstractProvider):
 
 	@classmethod
 	def _request_quote(cls, request, ticker):
-		payload, quoteMessage, updatedQuoteMessage = {}, "", ""
+		payload, quoteMessage, updatedQuoteMessage = {}, None, None
 
 		for platform in ["Stocks", "Forex"]:
 			if platform == "Stocks":
@@ -29,11 +29,11 @@ class IEXC(AbstractProvider):
 				payload, updatedQuoteMessage = IEXC._request_forex(request, ticker)
 
 			if bool(payload):
-				return [payload, updatedQuoteMessage]
-			elif updatedQuoteMessage != "":
+				return payload, updatedQuoteMessage
+			elif updatedQuoteMessage is not None:
 				quoteMessage = updatedQuoteMessage
 
-		return [{}, quoteMessage]
+		return None, quoteMessage
 
 	@classmethod
 	def _request_stocks(cls, request, ticker):
@@ -42,10 +42,10 @@ class IEXC(AbstractProvider):
 		try:
 			stock = Stock(ticker.get("symbol"), token=environ["IEXC_KEY"])
 			rawData = stock.get_quote().loc[ticker.get("symbol")]
-			if ticker.get("quote") is None and exchange is not None: return [{}, f"Price for `{ticker.get('name')}` is not available on {exchange.name}."]
-			if rawData is None or (rawData["latestPrice"] is None and rawData["delayedPrice"] is None): return [{}, ""]
+			if ticker.get("quote") is None and exchange is not None: return None, f"Price for `{ticker.get('name')}` is not available on {exchange.name}."
+			if rawData is None or (rawData["latestPrice"] is None and rawData["delayedPrice"] is None): return None, None
 		except:
-			return [{}, ""]
+			return None, None
 
 		try: coinThumbnail = stock.get_logo().loc[ticker.get("symbol")]["url"]
 		except: coinThumbnail = static_storage.icon
@@ -73,21 +73,21 @@ class IEXC(AbstractProvider):
 			payload["quoteVolume"] = "{:,.4f}".format(volume).rstrip('0').rstrip('.') + " " + ticker.get("base")
 			payload["raw"]["quoteVolume"] = [volume]
 
-		return [payload, ""]
+		return payload, None
 
 	@classmethod
 	def _request_forex(cls, request, ticker):
 		exchange = Exchange.from_dict(ticker.get("exchange"))
 
 		try:
-			if exchange is not None: return [{}, ""]
+			if exchange is not None: return None, None
 			rawData = get(f"https://cloud.iexapis.com/stable/fx/latest?symbols={ticker.get('id')}&token={environ['IEXC_KEY']}").json()
-			if rawData is None or type(rawData) is not list or len(rawData) == 0: return [{}, ""]
+			if rawData is None or type(rawData) is not list or len(rawData) == 0: return None, None
 		except:
-			return [{}, ""]
+			return None, None
 
 		price = rawData[0]["rate"]
-		if price is None: return [{}, ""]
+		if price is None: return None, None
 
 		payload = {
 			"quotePrice": "{:,.5f} {}".format(price, ticker.get("quote")),
@@ -101,7 +101,7 @@ class IEXC(AbstractProvider):
 				"timestamp": time()
 			}
 		}
-		return [payload, ""]
+		return payload, None
 
 	@classmethod
 	def _request_depth(cls, request, ticker):
@@ -114,7 +114,7 @@ class IEXC(AbstractProvider):
 			stock = Stock(ticker.get("symbol"), token=environ["IEXC_KEY"])
 			depthData = stock.get_book()[ticker.get("symbol")]
 			rawData = stock.get_quote().loc[ticker.get("symbol")]
-			if ticker.get("quote") is None and exchange is not None: return [{}, f"Orderbook visualization for `{ticker.get('name')}` is not available on {exchange.get('name')}."]
+			if ticker.get("quote") is None and exchange is not None: return None, f"Orderbook visualization for `{ticker.get('name')}` is not available on {exchange.get('name')}."
 			lastPrice = (depthData["bids"][0]["price"] + depthData["asks"][0]["price"]) / 2
 			depthData = {
 				"bids": [[e.get("price"), e.get("size")] for e in depthData["bids"] if e.get("price") >= lastPrice * 0.75],
@@ -123,7 +123,7 @@ class IEXC(AbstractProvider):
 			bestBid = depthData["bids"][0]
 			bestAsk = depthData["asks"][0]
 		except:
-			return [{}, ""]
+			return None, None
 
 		imageBuffer = BytesIO()
 		chartImage = Image.new("RGBA", (1600, 1200))
@@ -139,7 +139,7 @@ class IEXC(AbstractProvider):
 			"platform": "IEXC"
 		}
 
-		return [payload, ""]
+		return payload, None
 
 	@classmethod
 	def request_details(cls, request):
@@ -151,7 +151,7 @@ class IEXC(AbstractProvider):
 			rawData = stock.get_quote().loc[ticker.get("id")]
 			historicData = stock.get_historical_prices(range="1y")
 		except:
-			return [{}, ""]
+			return None, None
 
 		try: stockLogoThumbnail = stock.get_logo().loc[ticker.get("id")]["url"]
 		except: stockLogoThumbnail = None
@@ -183,4 +183,4 @@ class IEXC(AbstractProvider):
 		if companyData["website"] is not None and companyData["website"] != "": payload["url"] = companyData["website"] if companyData["website"].startswith("http") else "https://" + companyData["website"]
 		if companyData["country"] is not None: payload["info"]["location"] = f"{companyData['address']}{'' if companyData['address2'] is None else ', ' + companyData['address2']}, {companyData['city']}, {companyData['state']}, {companyData['country']}"
 
-		return [payload, ""]
+		return payload, None

@@ -27,4 +27,4 @@ class Alternativeme(AbstractProvider):
 				"timestamp": time()
 			}
 		}
-		return [payload, ""]
+		return payload, None

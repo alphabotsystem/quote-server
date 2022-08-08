@@ -33,23 +33,23 @@ class AbstractProvider(object):
 	def request_quote(cls, request, **kwargs):
 		ticker = request.get("ticker")
 		tree = ticker.pop("tree")
-		if tree is None: return [{}, ""]
+		if tree is None: return None, None
 
 		tickerTree = cls.build_tree(tree)
 
 		if not ticker.get("isSimple"):
 			priceCalculatorTree = AbstractProvider.CalculateTree(cls, request, "quotePrice", **kwargs)
 			try: price = priceCalculatorTree.transform(tickerTree)
-			except: return [{}, priceCalculatorTree.error]
+			except: return None, priceCalculatorTree.error
 			if priceCalculatorTree.error is not None:
-				return [{}, priceCalculatorTree.error]
+				return None, priceCalculatorTree.error
 
 			volumeCalculatorTree = AbstractProvider.CalculateTree(cls, request, "quoteVolume", **kwargs)
 			volumeCalculatorTree.vars = priceCalculatorTree.vars
 			try: volume = volumeCalculatorTree.transform(tickerTree)
-			except: return [{}, priceCalculatorTree.error]
+			except: return None, priceCalculatorTree.error
 			if volumeCalculatorTree.error is not None:
-				return [{}, volumeCalculatorTree.error]
+				return None, volumeCalculatorTree.error
 
 			payload = {
 				"quotePrice": "{:,.8f}".format(price).rstrip("0").rstrip("."),
@@ -69,7 +69,7 @@ class AbstractProvider(object):
 		else:
 			[payload, quoteMessage] = cls._request_quote(request, tickerTree.children[0].value, **kwargs)
 		
-		return [payload, quoteMessage]
+		return payload, quoteMessage
 
 	@classmethod
 	@abstractmethod
@@ -80,7 +80,7 @@ class AbstractProvider(object):
 	def request_depth(cls, request, **kwargs):
 		ticker = request.get("ticker")
 		tree = ticker.pop("tree")
-		if tree is None: return [{}, ""]
+		if tree is None: return None, ""
 
 		tickerTree = cls.build_tree(tree)
 
@@ -90,7 +90,7 @@ class AbstractProvider(object):
 		else:
 			[payload, quoteMessage] = cls._request_depth(request, tickerTree.children[0].value, **kwargs)
 
-		return [payload, quoteMessage]
+		return payload, quoteMessage
 
 	@classmethod
 	@abstractmethod

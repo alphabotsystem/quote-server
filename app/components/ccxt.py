@@ -23,14 +23,14 @@ class CCXT(AbstractProvider):
 	def _request_quote(cls, request, ticker):
 		exchange = Exchange.from_dict(ticker.get("exchange"))
 
-		if exchange is None: return [{}, ""]
+		if exchange is None: return None, None
 
 		tf, limitTimestamp, candleOffset = CCXT.get_highest_supported_timeframe(exchange.properties, datetime.now().astimezone(utc))
 		try:
 			rawData = exchange.properties.fetch_ohlcv(ticker.get("symbol"), timeframe=tf.lower(), since=limitTimestamp, limit=300)
-			if len(rawData) == 0 or rawData[-1][4] is None or rawData[0][1] is None: return [{}, ""]
+			if len(rawData) == 0 or rawData[-1][4] is None or rawData[0][1] is None: return None, None
 		except:
-			return [{}, ""]
+			return None, None
 
 		price = [rawData[-1][4], rawData[0][1]] if len(rawData) < candleOffset else [rawData[-1][4], rawData[-candleOffset][1]]
 		volume = None if price[0] is None else sum([candle[5] for candle in rawData if int(candle[0] / 1000) >= int(exchange.properties.milliseconds() / 1000) - 86400]) / (price[0] if exchange.id == "bitmex" else 1)
@@ -55,7 +55,7 @@ class CCXT(AbstractProvider):
 			}
 		}
 
-		return [payload, ""]
+		return payload, None
 
 	@classmethod
 	def _request_depth(cls, request, ticker):
@@ -64,7 +64,7 @@ class CCXT(AbstractProvider):
 		preferences = request.get("preferences")
 		forceMode = {"id": "force", "value": "force"} in preferences
 
-		if exchange is None: return [{}, ""]
+		if exchange is None: return None, None
 
 		try:
 			depthData = exchange.properties.fetch_order_book(ticker.get("symbol"))
@@ -72,7 +72,7 @@ class CCXT(AbstractProvider):
 			bestAsk = depthData["asks"][0]
 			lastPrice = (bestBid[0] + bestAsk[0]) / 2
 		except:
-			return [{}, ""]
+			return None, None
 
 		imageBuffer = BytesIO()
 		chartImage = Image.new("RGBA", (1600, 1200))
@@ -88,7 +88,7 @@ class CCXT(AbstractProvider):
 			"platform": "CCXT"
 		}
 
-		return [payload, ""]
+		return payload, None
 
 	@classmethod
 	def request_lld(cls, request):
@@ -96,13 +96,13 @@ class CCXT(AbstractProvider):
 		exchange = Exchange.from_dict(ticker.get("exchange"))
 		preferences = request.get("preferences")
 		action = [e.get("value") for e in preferences if e.get("id") == "lld"]
-		if len(action) == 0: return [{}, ""]
+		if len(action) == 0: return None, None
 		action = action[0]
 
 		if action == "funding":
 			if exchange.id in ["bitmex"]:
 				try: rawData = exchange.properties.public_get_instrument({"symbol": ticker.get("id")})[0]
-				except: return [{}, f"Requested funding data for `{ticker.get('name')}` is not available."]
+				except: return None, f"Requested funding data for `{ticker.get('name')}` is not available."
 
 				if rawData["fundingTimestamp"] is not None:
 					fundingDate = datetime.strptime(rawData["fundingTimestamp"], "%Y-%m-%dT%H:%M:00.000Z").replace(tzinfo=utc)
@@ -129,12 +129,12 @@ class CCXT(AbstractProvider):
 						"timestamp": time()
 					}
 				}
-				return [payload, ""]
-			return [{}, "Funding data is only available on BitMEX."]
+				return payload, None
+			return None, "Funding data is only available on BitMEX."
 		elif action == "oi":
 			if exchange.id in ["bitmex"]:
 				try: rawData = exchange.properties.public_get_instrument({"symbol": ticker.get("id")})[0]
-				except: return [{}, f"Requested open interest data for `{ticker.get('name')}` is not available."]
+				except: return None, f"Requested open interest data for `{ticker.get('name')}` is not available."
 
 				coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")
 
@@ -151,8 +151,8 @@ class CCXT(AbstractProvider):
 						"timestamp": time()
 					}
 				}
-				return [payload, ""]
-			return [{}, "Open interest and open value data is only available on BitMEX."]
+				return payload, None
+			return None, "Open interest and open value data is only available on BitMEX."
 		elif action == "ls":
 			if exchange.id in ["bitfinex2"]:
 				try:
@@ -160,7 +160,7 @@ class CCXT(AbstractProvider):
 					shorts = exchange.properties.publicGetStats1KeySizeSymbolShortLast({"key": "pos.size", "size": "1m", "symbol": f"t{ticker.get('id')}", "side": "long", "section": "last"})
 					ratio = longs[1] / (longs[1] + shorts[1]) * 100
 				except:
-					return [{}, ""]
+					return None, None
 
 				coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")
 
@@ -177,12 +177,12 @@ class CCXT(AbstractProvider):
 						"timestamp": time()
 					}
 				}
-				return [payload, ""]
-			return [{}, "Longs and shorts data is only available on Bitfinex."]
+				return payload, None
+			return None, "Longs and shorts data is only available on Bitfinex."
 		elif action == "dom":
 			try: rawData = CoinGecko.connection.get_global()
-			except: return [{}, f"Requested dominance data for `{ticker.get('name')}` is not available."]
-			if ticker.get("base").lower() not in rawData["market_cap_percentage"]: return [{}, f"Dominance for {ticker.get('base')} does not exist."]
+			except: return None, f"Requested dominance data for `{ticker.get('name')}` is not available."
+			if ticker.get("base").lower() not in rawData["market_cap_percentage"]: return None, f"Dominance for {ticker.get('base')} does not exist."
 			coinDominance = rawData["market_cap_percentage"][ticker.get("base").lower()]
 
 			coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")
@@ -199,9 +199,9 @@ class CCXT(AbstractProvider):
 					"timestamp": time()
 				}
 			}
-			return [payload, ""]
+			return payload, None
 		else:
-			return [{}, ""]
+			return None, None
 
 	@staticmethod
 	def get_highest_supported_timeframe(exchange, n):

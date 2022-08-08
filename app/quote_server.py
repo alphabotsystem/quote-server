@@ -27,7 +27,7 @@ loop = new_event_loop()
 set_event_loop(loop)
 
 async def request_quote(request):
-	payload, finalMessage, message = {}, "", ""
+	payload, finalMessage, message = {}, None, None
 
 	for platform in request["platforms"]:
 		currentRequest = request.get(platform)
@@ -53,13 +53,13 @@ async def request_quote(request):
 					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
 				}, merge=True))
 			return {"response": payload, "message": message}
-		elif message != "":
+		elif message is not None:
 			finalMessage = message
 
 	return {"response": None, "message": finalMessage}
 
 async def request_depth(request):
-	payload, finalMessage, message = {}, "", ""
+	payload, finalMessage, message = {}, None, None
 
 	for platform in request["platforms"]:
 		currentRequest = request.get(platform)
@@ -75,13 +75,13 @@ async def request_depth(request):
 					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
 				}, merge=True))
 			return {"response": payload, "message": message}
-		elif message != "":
+		elif message is not None:
 			finalMessage = message
 
 	return {"response": None, "message": finalMessage}
 
 async def request_detail(request):
-	payload, finalMessage, message = {}, "", ""
+	payload, finalMessage, message = {}, None, None
 
 	for platform in request["platforms"]:
 		currentRequest = request.get(platform)
@@ -97,7 +97,7 @@ async def request_detail(request):
 					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
 				}, merge=True))
 			return {"response": payload, "message": message}
-		elif message != "":
+		elif message is not None:
 			finalMessage = message
 
 	return {"response": None, "message": finalMessage}
