@@ -33,19 +33,19 @@ async def request_quote(request):
 		currentRequest = request.get(platform)
 
 		if platform == "Alternative.me":
-			payload, message = await loop.run_in_executor(None, Alternativeme.request_quote(currentRequest))
+			payload, message = await loop.run_in_executor(None, Alternativeme.request_quote, currentRequest)
 		elif platform == "CNN Business":
-			payload, message = await loop.run_in_executor(None, CNNBusiness.request_quote(currentRequest))
+			payload, message = await loop.run_in_executor(None, CNNBusiness.request_quote, currentRequest)
 		elif platform == "CoinGecko":
-			payload, message = await loop.run_in_executor(None, CoinGecko.request_quote(currentRequest))
+			payload, message = await loop.run_in_executor(None, CoinGecko.request_quote, currentRequest)
 		elif platform == "CCXT":
-			payload, message = await loop.run_in_executor(None, CCXT.request_quote(currentRequest))
+			payload, message = await loop.run_in_executor(None, CCXT.request_quote, currentRequest)
 		elif platform == "Serum":
-			payload, message = await loop.run_in_executor(None, Serum.request_quote(currentRequest))
+			payload, message = await loop.run_in_executor(None, Serum.request_quote, currentRequest)
 		elif platform == "IEXC":
-			payload, message = await loop.run_in_executor(None, IEXC.request_quote(currentRequest))
+			payload, message = await loop.run_in_executor(None, IEXC.request_quote, currentRequest)
 		elif platform == "LLD":
-			payload, message = await loop.run_in_executor(None, CCXT.request_lld(currentRequest))
+			payload, message = await loop.run_in_executor(None, CCXT.request_lld, currentRequest)
 
 		if bool(payload):
 			if currentRequest["ticker"].get("base") is not None:
@@ -65,9 +65,9 @@ async def request_depth(request):
 		currentRequest = request.get(platform)
 
 		if platform == "CCXT":
-			payload, message = await loop.run_in_executor(None, CCXT.request_depth(currentRequest))
+			payload, message = await loop.run_in_executor(None, CCXT.request_depth, currentRequest)
 		elif platform == "IEXC":
-			payload, message = await loop.run_in_executor(None, IEXC.request_depth(currentRequest))
+			payload, message = await loop.run_in_executor(None, IEXC.request_depth, currentRequest)
 
 		if bool(payload):
 			if currentRequest["ticker"].get("base") is not None:
@@ -87,9 +87,9 @@ async def request_detail(request):
 		currentRequest = request.get(platform)
 
 		if platform == "CoinGecko":
-			payload, message = await loop.run_in_executor(None, CoinGecko.request_details(currentRequest))
+			payload, message = await loop.run_in_executor(None, CoinGecko.request_details, currentRequest)
 		elif platform == "IEXC":
-			payload, message = await loop.run_in_executor(None, IEXC.request_details(currentRequest))
+			payload, message = await loop.run_in_executor(None, IEXC.request_details, currentRequest)
 
 		if bool(payload):
 			if currentRequest["ticker"].get("base") is not None:
