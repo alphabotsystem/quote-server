@@ -1,11 +1,14 @@
 from os import environ
-from signal import signal, SIGINT, SIGTERM
-from time import time
-from zmq import Context, ROUTER
-from orjson import dumps, loads
+environ["PRODUCTION_MODE"] = environ["PRODUCTION_MODE"] if "PRODUCTION_MODE" in environ and environ["PRODUCTION_MODE"] else ""
+
+from time import time, sleep
+from uuid import uuid4
+from fastapi import FastAPI, Request
+import uvicorn
+from asyncio import new_event_loop, set_event_loop
 from traceback import format_exc
 
-from google.cloud.firestore import Client as FirestoreClient
+from google.cloud.firestore import AsyncClient as FirestoreClient
 from google.cloud.firestore import ArrayUnion
 from google.cloud.error_reporting import Client as ErrorReportingClient
 
@@ -17,112 +20,103 @@ from components.iexc import IEXC
 from components.serum import Serum
 
 
+app = FastAPI()
 database = FirestoreClient()
+logging = ErrorReportingClient(service="details_server")
+loop = new_event_loop()
+set_event_loop(loop)
 
+async def request_quote(request):
+	payload, finalMessage, message = {}, "", ""
 
-class QuoteProcessor(object):
-	def __init__(self):
-		self.isServiceAvailable = True
-		signal(SIGINT, self.exit_gracefully)
-		signal(SIGTERM, self.exit_gracefully)
+	for platform in request["platforms"]:
+		currentRequest = request.get(platform)
 
-		self.logging = ErrorReportingClient(service="quote_server")
+		if platform == "Alternative.me":
+			payload, message = await loop.run_in_executor(None, Alternativeme.request_quote(currentRequest))
+		elif platform == "CNN Business":
+			payload, message = await loop.run_in_executor(None, CNNBusiness.request_quote(currentRequest))
+		elif platform == "CoinGecko":
+			payload, message = await loop.run_in_executor(None, CoinGecko.request_quote(currentRequest))
+		elif platform == "CCXT":
+			payload, message = await loop.run_in_executor(None, CCXT.request_quote(currentRequest))
+		elif platform == "Serum":
+			payload, message = await loop.run_in_executor(None, Serum.request_quote(currentRequest))
+		elif platform == "IEXC":
+			payload, message = await loop.run_in_executor(None, IEXC.request_quote(currentRequest))
+		elif platform == "LLD":
+			payload, message = await loop.run_in_executor(None, CCXT.request_lld(currentRequest))
 
-		self.context = Context.instance()
-		self.socket = self.context.socket(ROUTER)
-		self.socket.bind("tcp://*:6900")
+		if bool(payload):
+			if currentRequest["ticker"].get("base") is not None:
+				database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
+					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
+				}, merge=True)
+			return {"response": payload, "message": message}
+		elif message != "":
+			finalMessage = message
 
-		print("[Startup]: Quote Server is online")
+	return {"response": None, "message": finalMessage}
 
-	def exit_gracefully(self, signum, frame):
-		print("[Startup]: Quote Server is exiting")
-		self.socket.close()
-		self.isServiceAvailable = False
+async def request_depth(request):
+	payload, finalMessage, message = {}, "", ""
 
-	def run(self):
-		request = None
-		while self.isServiceAvailable:
-			try:
-				response = [dumps({}),  b""]
-				message = self.socket.recv_multipart()
-				if len(message) != 5: continue
-				origin, delimeter, clientId, service, request = message
-				request = loads(request)
-				if request.get("timestamp") + 60 < time():
-					print("Request received too late")
-					continue
+	for platform in request["platforms"]:
+		currentRequest = request.get(platform)
 
-				if service == b"quote":
-					response = self.request_quote(request, clientId)
-				elif service == b"depth":
-					response = self.request_depth(request, clientId)
+		if platform == "CCXT":
+			payload, message = await loop.run_in_executor(None, CCXT.request_depth(currentRequest))
+		elif platform == "IEXC":
+			payload, message = await loop.run_in_executor(None, IEXC.request_depth(currentRequest))
 
-			except (KeyboardInterrupt, SystemExit): return
-			except Exception:
-				print(format_exc())
-				print(request)
-				if environ["PRODUCTION_MODE"]: self.logging.report_exception()
-			finally:
-				try: self.socket.send_multipart([origin, delimeter] + response)
-				except: pass
-				request = None
+		if bool(payload):
+			if currentRequest["ticker"].get("base") is not None:
+				database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
+					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
+				}, merge=True)
+			return {"response": payload, "message": message}
+		elif message != "":
+			finalMessage = message
 
-	def request_quote(self, request, clientId):
-		payload, quoteMessage, updatedQuoteMessage = {}, "", ""
+	return {"response": None, "message": finalMessage}
 
-		for platform in request["platforms"]:
-			currentRequest = request.get(platform)
+async def request_detail(request):
+	payload, finalMessage, message = {}, "", ""
 
-			if platform == "Alternative.me":
-				payload, updatedQuoteMessage = Alternativeme.request_quote(currentRequest)
-			elif platform == "CNN Business":
-				payload, updatedQuoteMessage = CNNBusiness.request_quote(currentRequest)
-			elif platform == "CoinGecko":
-				payload, updatedQuoteMessage = CoinGecko.request_quote(currentRequest)
-			elif platform == "CCXT":
-				payload, updatedQuoteMessage = CCXT.request_quote(currentRequest)
-			elif platform == "Serum":
-				payload, updatedQuoteMessage = Serum.request_quote(currentRequest, context=self.context)
-			elif platform == "IEXC":
-				payload, updatedQuoteMessage = IEXC.request_quote(currentRequest)
-			elif platform == "LLD":
-				payload, updatedQuoteMessage = CCXT.request_lld(currentRequest)
+	for platform in request["platforms"]:
+		currentRequest = request.get(platform)
 
-			if bool(payload):
-				if clientId in [b"discord_alpha"] and currentRequest["ticker"].get("base") is not None:
-					database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
-						currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
-					}, merge=True)
-				return [dumps(payload), updatedQuoteMessage.encode()]
-			elif updatedQuoteMessage != "":
-				quoteMessage = updatedQuoteMessage
+		if platform == "CoinGecko":
+			payload, message = await loop.run_in_executor(None, CoinGecko.request_details(currentRequest))
+		elif platform == "IEXC":
+			payload, message = await loop.run_in_executor(None, IEXC.request_details(currentRequest))
 
-		return [dumps({}), quoteMessage.encode()]
+		if bool(payload):
+			if currentRequest["ticker"].get("base") is not None:
+				await database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
+					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
+				}, merge=True)
+			return {"response": payload, "message": message}
+		elif message != "":
+			finalMessage = message
 
-	def request_depth(self, request, clientId):
-		payload, quoteMessage, updatedQuoteMessage = {}, "", ""
+	return {"response": None, "message": finalMessage}
 
-		for platform in request["platforms"]:
-			currentRequest = request.get(platform)
+@app.post("/quote")
+async def run(req: Request):
+	request = await req.json()
+	return await request_quote(request)
 
-			if platform == "CCXT":
-				payload, updatedQuoteMessage = CCXT.request_depth(currentRequest)
-			elif platform == "IEXC":
-				payload, updatedQuoteMessage = IEXC.request_depth(currentRequest)
+@app.post("/depth")
+async def run(req: Request):
+	request = await req.json()
+	return await request_depth(request)
 
-			if bool(payload):
-				if clientId in [b"discord_alpha"] and currentRequest["ticker"].get("base") is not None:
-					database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
-						currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
-					}, merge=True)
-				return [dumps(payload), updatedQuoteMessage.encode()]
-			elif updatedQuoteMessage != "":
-				quoteMessage = updatedQuoteMessage
-
-		return [dumps({}), quoteMessage.encode()]
-
+@app.post("/detail")
+async def run(req: Request):
+	request = await req.json()
+	return await request_detail(request)
 
 if __name__ == "__main__":
-	environ["PRODUCTION_MODE"] = environ["PRODUCTION_MODE"] if "PRODUCTION_MODE" in environ and environ["PRODUCTION_MODE"] else ""
-	quoteServer = QuoteProcessor()
-	quoteServer.run()
+	print("[Startup]: Quote Server is online")
+	uvicorn.run(app, port=int(environ.get("PORT", 8080)), host="0.0.0.0", loop="asyncio")

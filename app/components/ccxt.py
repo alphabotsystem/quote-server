@@ -16,7 +16,7 @@ from assets import static_storage
 class CCXT(AbstractProvider):
 	name = "CCXT"
 	chartOverlay = {
-		"normal": Image.open("app/assets/overlays/quotes/depth.png").convert("RGBA")
+		"normal": Image.open("assets/overlays/quotes/depth.png").convert("RGBA")
 	}
 
 	@classmethod

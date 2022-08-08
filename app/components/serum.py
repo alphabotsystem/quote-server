@@ -8,11 +8,12 @@ from assets import static_storage
 
 class Serum(AbstractProvider):
 	name = "Serum"
+	context = Context.instance()
 
 	@classmethod
-	def _request_quote(cls, request, ticker, context=None):
+	def _request_quote(cls, request, ticker):
 		try:
-			socket = context.socket(REQ)
+			socket = Serum.context.socket(REQ)
 			socket.connect("tcp://serum-server:6900")
 			socket.setsockopt(LINGER, 0)
 			poller = Poller()
