@@ -120,7 +120,7 @@ class AbstractProvider(object):
 				return self.vars[hashName][self.requestType][0]
 			except KeyError:
 				[response, quoteMessage] = self.cls._request_quote(self.request, name.value, **self.kwargs)
-				if not bool(response) or quoteMessage != "":
+				if not bool(response) or quoteMessage is not None:
 					self.error = quoteMessage
 					return random()
 				else:
