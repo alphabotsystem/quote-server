@@ -5,7 +5,7 @@ from time import time, sleep
 from uuid import uuid4
 from fastapi import FastAPI, Request
 from uvicorn import Config, Server
-from asyncio import new_event_loop, set_event_loop
+from asyncio import new_event_loop, set_event_loop, create_task
 from traceback import format_exc
 
 from google.cloud.firestore import AsyncClient as FirestoreClient
@@ -49,9 +49,9 @@ async def request_quote(request):
 
 		if bool(payload):
 			if not request.get("bot", False) and currentRequest["ticker"].get("base") is not None:
-				await database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
+				create_task(database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
 					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
-				}, merge=True)
+				}, merge=True))
 			return {"response": payload, "message": message}
 		elif message != "":
 			finalMessage = message
@@ -71,9 +71,9 @@ async def request_depth(request):
 
 		if bool(payload):
 			if not request.get("bot", False) and currentRequest["ticker"].get("base") is not None:
-				await database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
+				create_task(database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
 					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
-				}, merge=True)
+				}, merge=True))
 			return {"response": payload, "message": message}
 		elif message != "":
 			finalMessage = message
@@ -93,9 +93,9 @@ async def request_detail(request):
 
 		if bool(payload):
 			if not request.get("bot", False) and currentRequest["ticker"].get("base") is not None:
-				await database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
+				create_task(database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
 					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
-				}, merge=True)
+				}, merge=True))
 			return {"response": payload, "message": message}
 		elif message != "":
 			finalMessage = message
