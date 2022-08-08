@@ -4,7 +4,7 @@ environ["PRODUCTION_MODE"] = environ["PRODUCTION_MODE"] if "PRODUCTION_MODE" in 
 from time import time, sleep
 from uuid import uuid4
 from fastapi import FastAPI, Request
-import uvicorn
+from uvicorn import Config, Server
 from asyncio import new_event_loop, set_event_loop
 from traceback import format_exc
 
@@ -119,4 +119,6 @@ async def run(req: Request):
 
 if __name__ == "__main__":
 	print("[Startup]: Quote Server is online")
-	uvicorn.run(app, port=int(environ.get("PORT", 8080)), host="0.0.0.0", loop="asyncio")
+	config = Config(app=app, port=int(environ.get("PORT", 8080)), host="0.0.0.0", loop=loop)
+	server = Server(config)
+	loop.run_until_complete(server.serve())
