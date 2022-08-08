@@ -48,8 +48,8 @@ async def request_quote(request):
 			payload, message = await loop.run_in_executor(None, CCXT.request_lld, currentRequest)
 
 		if bool(payload):
-			if currentRequest["ticker"].get("base") is not None:
-				database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
+			if not request.get("bot", False) and currentRequest["ticker"].get("base") is not None:
+				await database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
 					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
 				}, merge=True)
 			return {"response": payload, "message": message}
@@ -70,8 +70,8 @@ async def request_depth(request):
 			payload, message = await loop.run_in_executor(None, IEXC.request_depth, currentRequest)
 
 		if bool(payload):
-			if currentRequest["ticker"].get("base") is not None:
-				database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
+			if not request.get("bot", False) and currentRequest["ticker"].get("base") is not None:
+				await database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
 					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
 				}, merge=True)
 			return {"response": payload, "message": message}
@@ -92,7 +92,7 @@ async def request_detail(request):
 			payload, message = await loop.run_in_executor(None, IEXC.request_details, currentRequest)
 
 		if bool(payload):
-			if currentRequest["ticker"].get("base") is not None:
+			if not request.get("bot", False) and currentRequest["ticker"].get("base") is not None:
 				await database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
 					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
 				}, merge=True)
