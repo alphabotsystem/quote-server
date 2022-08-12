@@ -115,6 +115,7 @@ class IEXC(AbstractProvider):
 			depthData = stock.get_book()[ticker.get("symbol")]
 			rawData = stock.get_quote().loc[ticker.get("symbol")]
 			if ticker.get("quote") is None and exchange is not None: return None, f"Orderbook visualization for `{ticker.get('name')}` is not available on {exchange.get('name')}."
+			if not depthData["quote"].get("isUSMarketOpen", True): return None, "US market is currently not open."
 			lastPrice = (depthData["bids"][0]["price"] + depthData["asks"][0]["price"]) / 2
 			depthData = {
 				"bids": [[e.get("price"), e.get("size")] for e in depthData["bids"] if e.get("price") >= lastPrice * 0.75],
