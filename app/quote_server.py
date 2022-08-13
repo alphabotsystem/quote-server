@@ -8,8 +8,6 @@ from uvicorn import Config, Server
 from asyncio import new_event_loop, set_event_loop, create_task
 from traceback import format_exc
 
-from google.cloud.firestore import AsyncClient as FirestoreClient
-from google.cloud.firestore import ArrayUnion
 from google.cloud.error_reporting import Client as ErrorReportingClient
 
 from components.alternativeme import Alternativeme
@@ -21,7 +19,6 @@ from components.serum import Serum
 
 
 app = FastAPI()
-database = FirestoreClient()
 logging = ErrorReportingClient(service="details_server")
 loop = new_event_loop()
 set_event_loop(loop)
@@ -48,10 +45,6 @@ async def request_quote(request):
 			payload, message = await loop.run_in_executor(None, CCXT.request_lld, currentRequest)
 
 		if bool(payload):
-			if not request.get("bot", False) and currentRequest["ticker"].get("base") is not None:
-				create_task(database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
-					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
-				}, merge=True))
 			return {"response": payload, "message": message}
 		elif message is not None:
 			finalMessage = message
@@ -70,10 +63,6 @@ async def request_depth(request):
 			payload, message = await loop.run_in_executor(None, IEXC.request_depth, currentRequest)
 
 		if bool(payload):
-			if not request.get("bot", False) and currentRequest["ticker"].get("base") is not None:
-				create_task(database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
-					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
-				}, merge=True))
 			return {"response": payload, "message": message}
 		elif message is not None:
 			finalMessage = message
@@ -92,10 +81,6 @@ async def request_detail(request):
 			payload, message = await loop.run_in_executor(None, IEXC.request_details, currentRequest)
 
 		if bool(payload):
-			if not request.get("bot", False) and currentRequest["ticker"].get("base") is not None:
-				create_task(database.document(f"dataserver/statistics/{currentRequest.get('parserBias')}/{int(time() // 3600 * 3600)}").set({
-					currentRequest["ticker"].get("base"): ArrayUnion([str(request.get("authorId"))]),
-				}, merge=True))
 			return {"response": payload, "message": message}
 		elif message is not None:
 			finalMessage = message
