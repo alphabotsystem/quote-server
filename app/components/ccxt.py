@@ -20,14 +20,14 @@ class CCXT(AbstractProvider):
 		"normal": Image.open("assets/overlays/quotes/depth.png").convert("RGBA")
 	}
 
-	ccxtCache = {}
+	cache = {}
 
 	@classmethod
 	def _request_quote(cls, request, ticker):
-		exchange = Exchange.from_dict(ticker.get("exchange"), cache=cls.ccxtCache.get(ticker.get("exchange", {}).get("id")))
+		exchange = Exchange.from_dict(ticker.get("exchange"), cache=cls.cache.get(ticker.get("exchange", {}).get("id")))
 
 		if exchange is None: return None, None
-		cls.ccxtCache[exchange.id] = exchange.properties
+		cls.cache[exchange.id] = exchange.properties
 
 		tf, limitTimestamp, candleOffset = CCXT.get_highest_supported_timeframe(exchange.properties, datetime.now().astimezone(utc))
 		try:
