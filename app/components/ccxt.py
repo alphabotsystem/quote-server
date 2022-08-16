@@ -24,7 +24,7 @@ class CCXT(AbstractProvider):
 
 	@classmethod
 	def _request_quote(cls, request, ticker):
-		exchange = Exchange.from_dict(ticker.get("exchange"), ccxt=cls.ccxtCache.get(ticker.get("exchange", {}).get("id")))
+		exchange = Exchange.from_dict(ticker.get("exchange"), cache=cls.ccxtCache.get(ticker.get("exchange", {}).get("id")))
 
 		if exchange is None: return None, None
 		cls.ccxtCache[exchange.id] = exchange.properties
