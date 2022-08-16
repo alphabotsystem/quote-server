@@ -4,6 +4,7 @@ from math import ceil
 from datetime import datetime
 from pytz import utc
 from base64 import decodebytes, b64encode
+from traceback import format_exc
 
 from PIL import Image
 
@@ -30,6 +31,7 @@ class CCXT(AbstractProvider):
 			rawData = exchange.properties.fetch_ohlcv(ticker.get("symbol"), timeframe=tf.lower(), since=limitTimestamp, limit=300)
 			if len(rawData) == 0 or rawData[-1][4] is None or rawData[0][1] is None: return None, None
 		except:
+			print(format_exc())
 			return None, None
 
 		price = [rawData[-1][4], rawData[0][1]] if len(rawData) < candleOffset else [rawData[-1][4], rawData[-candleOffset][1]]

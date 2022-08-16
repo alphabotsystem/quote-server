@@ -1,4 +1,5 @@
 from time import time
+from traceback import format_exc
 
 from pycoingecko import CoinGeckoAPI
 from markdownify import markdownify
@@ -16,6 +17,7 @@ class CoinGecko(AbstractProvider):
 		try:
 			rawData = CoinGecko.connection.get_coin_by_id(id=ticker.get("symbol"), localization="false", tickers=False, market_data=True, community_data=False, developer_data=False)
 		except:
+			print(format_exc())
 			return None, None
 
 		coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")

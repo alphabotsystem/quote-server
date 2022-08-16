@@ -1,6 +1,7 @@
 from time import time
 from zmq import Context, Poller, ROUTER, REQ, LINGER, POLLIN
 from orjson import dumps, loads
+from traceback import format_exc
 
 from components.abstract import AbstractProvider
 from assets import static_storage
@@ -30,6 +31,7 @@ class Serum(AbstractProvider):
 				socket.close()
 				return None, None
 		except:
+			print(format_exc())
 			return None, None
 
 		coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")

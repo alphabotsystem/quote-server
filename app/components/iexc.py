@@ -3,6 +3,7 @@ from time import time
 from io import BytesIO
 from base64 import decodebytes, b64encode
 from requests import get
+from traceback import format_exc
 
 from PIL import Image
 from iexfinance.stocks import Stock
@@ -45,6 +46,7 @@ class IEXC(AbstractProvider):
 			if ticker.get("quote") is None and exchange is not None: return None, f"Price for `{ticker.get('name')}` is not available on {exchange.name}."
 			if rawData is None or (rawData["latestPrice"] is None and rawData["delayedPrice"] is None): return None, None
 		except:
+			print(format_exc())
 			return None, None
 
 		try: coinThumbnail = stock.get_logo().loc[ticker.get("symbol")]["url"]
@@ -84,6 +86,7 @@ class IEXC(AbstractProvider):
 			rawData = get(f"https://cloud.iexapis.com/stable/fx/latest?symbols={ticker.get('id')}&token={environ['IEXC_KEY']}").json()
 			if rawData is None or type(rawData) is not list or len(rawData) == 0: return None, None
 		except:
+			print(format_exc())
 			return None, None
 
 		price = rawData[0]["rate"]
@@ -124,6 +127,7 @@ class IEXC(AbstractProvider):
 			bestBid = depthData["bids"][0]
 			bestAsk = depthData["asks"][0]
 		except:
+			print(format_exc())
 			return None, None
 
 		imageBuffer = BytesIO()
@@ -152,6 +156,7 @@ class IEXC(AbstractProvider):
 			rawData = stock.get_quote().loc[ticker.get("id")]
 			historicData = stock.get_historical_prices(range="1y")
 		except:
+			print(format_exc())
 			return None, None
 
 		try: stockLogoThumbnail = stock.get_logo().loc[ticker.get("id")]["url"]
