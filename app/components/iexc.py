@@ -21,20 +21,10 @@ class IEXC(AbstractProvider):
 
 	@classmethod
 	def _request_quote(cls, request, ticker):
-		payload, quoteMessage, updatedQuoteMessage = {}, None, None
-
-		for platform in ["Stocks", "Forex"]:
-			if platform == "Stocks":
-				payload, updatedQuoteMessage = IEXC._request_stocks(request, ticker)
-			elif platform == "Forex":
-				payload, updatedQuoteMessage = IEXC._request_forex(request, ticker)
-
-			if bool(payload):
-				return payload, updatedQuoteMessage
-			elif updatedQuoteMessage is not None:
-				quoteMessage = updatedQuoteMessage
-
-		return None, quoteMessage
+		if ticker.get("exchange").get("id") == "fx":
+			return IEXC._request_forex(request, ticker)
+		else:
+			return IEXC._request_stocks(request, ticker)
 
 	@classmethod
 	def _request_stocks(cls, request, ticker):
