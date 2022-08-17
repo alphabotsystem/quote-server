@@ -213,10 +213,10 @@ class CCXT(AbstractProvider):
 		if exchange.timeframes is None: return ("1m", int(exchange.milliseconds() / 1000) - 60, 2)
 		dailyOpen = (int(exchange.milliseconds() / 1000) - (n.second + n.minute * 60 + n.hour * 3600)) * 1000
 		rolling24h = (int(exchange.milliseconds() / 1000) - 86400) * 1000
-		availableTimeframes = ["5m", "10m", "15m", "20m", "30m", "1H", "2H", "3H", "4H", "6H", "8H", "12H", "1D"]
+		availableTimeframes = ["5m", "10m", "15m", "20m", "30m", "1h", "2h", "3h", "4h", "6h", "8h", "12h", "1d"]
 		for tf in availableTimeframes:
 			if tf.lower() in exchange.timeframes:
-				return tf, min(rolling24h, dailyOpen), ceil(int((exchange.milliseconds() - dailyOpen) / 1000) / CCXT.get_frequency_time(tf))
+				return tf, rolling24h, ceil(int((exchange.milliseconds() - dailyOpen) / 1000) / CCXT.get_frequency_time(tf))
 		return ("1m", int(exchange.milliseconds() / 1000) - 60, 2)
 
 	@staticmethod
