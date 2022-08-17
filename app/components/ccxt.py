@@ -42,11 +42,9 @@ class CCXT(AbstractProvider):
 		priceChange = 0 if tf == "1m" or price[1] == 0 else (price[0] / price[1]) * 100 - 100
 		coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")
 
-		base = "USD" if ticker.get("base") in AbstractProvider.stableCoinTickers else ticker.get("base")
-		quote = "USD" if ticker.get("quote") in AbstractProvider.stableCoinTickers else ticker.get("quote")
 		payload = {
-			"quotePrice": "{:,.10f}".format(price[0]).rstrip('0').rstrip('.') + " " + quote,
-			"quoteVolume": "{:,.4f}".format(volume).rstrip('0').rstrip('.') + " " + base,
+			"quotePrice": "{:,.10f}".format(price[0]).rstrip('0').rstrip('.') + " " + ticker.get("quote"),
+			"quoteVolume": "{:,.4f}".format(volume).rstrip('0').rstrip('.') + " " + ticker.get("base"),
 			"title": ticker.get("name"),
 			"change": "{:+.2f} %".format(priceChange),
 			"thumbnailUrl": coinThumbnail,

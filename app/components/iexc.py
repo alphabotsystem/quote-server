@@ -69,10 +69,7 @@ class IEXC(AbstractProvider):
 
 	@classmethod
 	def _request_forex(cls, request, ticker):
-		exchange = Exchange.from_dict(ticker.get("exchange"))
-
 		try:
-			if exchange is not None: return None, None
 			rawData = get(f"https://cloud.iexapis.com/stable/fx/latest?symbols={ticker.get('id')}&token={environ['IEXC_KEY']}").json()
 			if rawData is None or type(rawData) is not list or len(rawData) == 0: return None, None
 		except:

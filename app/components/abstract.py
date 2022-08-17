@@ -27,7 +27,6 @@ plt.rcParams['savefig.facecolor'] = "#131722"
 class AbstractProvider(object):
 	__metaclass__ = ABCMeta
 	bucket = storage_client.get_bucket("nlc-bot-36685.appspot.com")
-	stableCoinTickers = ["USD", "USDT", "USDC", "DAI", "HUSD", "TUSD", "PAX", "USDK", "USDN", "BUSD", "GUSD", "USDS"]
 
 	@classmethod
 	def request_quote(cls, request, **kwargs):
@@ -67,7 +66,7 @@ class AbstractProvider(object):
 			}
 			quoteMessage = ""
 		else:
-			[payload, quoteMessage] = cls._request_quote(request, tickerTree.children[0].value, **kwargs)
+			[payload, quoteMessage] = cls._request_quote(request, ticker, **kwargs)
 		
 		return payload, quoteMessage
 
@@ -88,7 +87,7 @@ class AbstractProvider(object):
 			payload = {}
 			quoteMessage = "Aggregated depth chart is not available yet."
 		else:
-			[payload, quoteMessage] = cls._request_depth(request, tickerTree.children[0].value, **kwargs)
+			[payload, quoteMessage] = cls._request_depth(request, ticker, **kwargs)
 
 		return payload, quoteMessage
 

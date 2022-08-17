@@ -41,11 +41,9 @@ class Serum(AbstractProvider):
 		volume = 0
 		tokenImage = static_storage.icon
 
-		base = "USD" if ticker.get("base") in AbstractProvider.stableCoinTickers else ticker.get("base")
-		quote = "USD" if ticker.get("quote") in AbstractProvider.stableCoinTickers else ticker.get("quote")
 		payload = {
-			"quotePrice": "{:,.10f}".format(price[0]).rstrip('0').rstrip('.') + " " + quote,
-			"quoteVolume": "{:,.4f}".format(volume).rstrip('0').rstrip('.') + " " + base,
+			"quotePrice": "{:,.10f}".format(price[0]).rstrip('0').rstrip('.') + " " + ticker.get("quote"),
+			"quoteVolume": "{:,.4f}".format(volume).rstrip('0').rstrip('.') + " " + ticker.get("base"),
 			"title": ticker.get("name"),
 			"thumbnailUrl": coinThumbnail,
 			"messageColor": "amber" if priceChange == 0 else ("green" if priceChange > 0 else "red"),
