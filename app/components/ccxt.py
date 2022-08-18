@@ -20,14 +20,11 @@ class CCXT(AbstractProvider):
 		"normal": Image.open("assets/overlays/quotes/depth.png").convert("RGBA")
 	}
 
-	cache = {}
-
 	@classmethod
 	def _request_quote(cls, request, ticker):
-		exchange = Exchange.from_dict(ticker.get("exchange"), cache=cls.cache.get(ticker.get("exchange", {}).get("id")))
+		exchange = Exchange.from_dict(ticker.get("exchange"))
 
-		if exchange is None or exchange.stale: return None, f"Data from {exchange.name} is currently unavailable."
-		cls.cache[exchange.id] = exchange.properties
+		if exchange is None: return None, None
 
 		tf, limitTimestamp, candleOffset = CCXT.get_highest_supported_timeframe(exchange.properties, datetime.now().astimezone(utc))
 		try:
@@ -35,7 +32,7 @@ class CCXT(AbstractProvider):
 			if len(rawData) == 0 or rawData[-1][4] is None or rawData[0][1] is None: return None, None
 		except:
 			print(format_exc())
-			return None, None
+			return None, f"Data from {exchange.name} is currently unavailable."
 
 		price = [rawData[-1][4], rawData[0][1]] if len(rawData) < candleOffset else [rawData[-1][4], rawData[-candleOffset][1]]
 		volume = None if price[0] is None else sum([candle[5] for candle in rawData if int(candle[0] / 1000) >= int(exchange.properties.milliseconds() / 1000) - 86400]) / (price[0] if exchange.id == "bitmex" else 1)
