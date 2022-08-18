@@ -15,7 +15,6 @@ from components.cnnbusiness import CNNBusiness
 from components.ccxt import CCXT
 from components.coingecko import CoinGecko
 from components.iexc import IEXC
-from components.serum import Serum
 
 
 app = FastAPI()
@@ -37,8 +36,6 @@ async def request_quote(request):
 			payload, message = await loop.run_in_executor(None, CoinGecko.request_quote, currentRequest)
 		elif platform == "CCXT":
 			payload, message = await loop.run_in_executor(None, CCXT.request_quote, currentRequest)
-		elif platform == "Serum":
-			payload, message = await loop.run_in_executor(None, Serum.request_quote, currentRequest)
 		elif platform == "IEXC":
 			payload, message = await loop.run_in_executor(None, IEXC.request_quote, currentRequest)
 		elif platform == "LLD":
