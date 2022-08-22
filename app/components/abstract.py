@@ -64,7 +64,7 @@ class AbstractProvider(object):
 					"timestamp": time()
 				}
 			}
-			quoteMessage = ""
+			quoteMessage = None
 		else:
 			[payload, quoteMessage] = cls._request_quote(request, ticker, **kwargs)
 		
@@ -79,7 +79,7 @@ class AbstractProvider(object):
 	def request_depth(cls, request, **kwargs):
 		ticker = request.get("ticker")
 		tree = ticker.pop("tree")
-		if tree is None: return None, ""
+		if tree is None: return None, None
 
 		tickerTree = cls.build_tree(tree)
 
