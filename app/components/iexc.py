@@ -95,6 +95,9 @@ class IEXC(AbstractProvider):
 
 	@classmethod
 	def _request_depth(cls, request, ticker):
+		if ticker.get("exchange").get("id") == "fx":
+			return None, "Orderbook visualizations are not available for forex markets."
+
 		exchange = Exchange.from_dict(ticker.get("exchange"))
 
 		preferences = request.get("preferences")
