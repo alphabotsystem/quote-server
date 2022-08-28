@@ -31,9 +31,9 @@ class IEXC(AbstractProvider):
 		exchange = Exchange.from_dict(ticker.get("exchange"))
 
 		try:
+			if ticker.get("quote") is None and exchange is not None: return None, f"Price for `{ticker.get('name')}` is not available on {exchange.name}."
 			stock = Stock(ticker.get("symbol"), token=environ["IEXC_KEY"])
 			rawData = stock.get_quote().loc[ticker.get("symbol")]
-			if ticker.get("quote") is None and exchange is not None: return None, f"Price for `{ticker.get('name')}` is not available on {exchange.name}."
 			if rawData is None or (rawData["latestPrice"] is None and rawData["delayedPrice"] is None): return None, None
 		except:
 			print(format_exc())
@@ -104,11 +104,10 @@ class IEXC(AbstractProvider):
 		forceMode = {"id": "force", "value": "force"} in preferences
 
 		try:
+			if ticker.get("quote") is None and exchange is not None: return None, f"Orderbook visualization for `{ticker.get('name')}` is not available on {exchange.get('name')}."
 			stock = Stock(ticker.get("symbol"), token=environ["IEXC_KEY"])
 			depthData = stock.get_book()[ticker.get("symbol")]
-			rawData = stock.get_quote().loc[ticker.get("symbol")]
-			if ticker.get("quote") is None and exchange is not None: return None, f"Orderbook visualization for `{ticker.get('name')}` is not available on {exchange.get('name')}."
-			if not depthData["quote"].get("isUSMarketOpen", True): return None, "US market is currently not open."
+			if not depthData["quote"].get("isUSMarketOpen", True): return None, "US stock market is currently not open."
 			lastPrice = (depthData["bids"][0]["price"] + depthData["asks"][0]["price"]) / 2
 			depthData = {
 				"bids": [[e.get("price"), e.get("size")] for e in depthData["bids"] if e.get("price") >= lastPrice * 0.75],
