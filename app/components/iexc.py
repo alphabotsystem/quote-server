@@ -20,7 +20,7 @@ class IEXC(AbstractProvider):
 
 	@classmethod
 	def _request_quote(cls, request, ticker):
-		if ticker["exchange"].get("id") == "fx":
+		if ticker["exchange"].get("id") == "forex":
 			return IEXC._request_forex(request, ticker)
 		else:
 			return IEXC._request_stocks(request, ticker)
@@ -99,7 +99,7 @@ class IEXC(AbstractProvider):
 	def _request_depth(cls, request, ticker):
 		exchange = ticker["exchange"]
 
-		if exchange.get("id") == "fx":
+		if exchange.get("id") == "forex":
 			return None, "Orderbook visualizations are not available for forex markets."
 		if not exchange:
 			return None, None
