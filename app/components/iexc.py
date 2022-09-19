@@ -8,7 +8,6 @@ from traceback import format_exc
 from PIL import Image
 from iexfinance.stocks import Stock
 
-from TickerParser import Exchange
 from components.abstract import AbstractProvider
 from assets import static_storage
 
@@ -21,17 +20,20 @@ class IEXC(AbstractProvider):
 
 	@classmethod
 	def _request_quote(cls, request, ticker):
-		if ticker.get("exchange").get("id") == "fx":
+		if ticker["exchange"].get("id") == "fx":
 			return IEXC._request_forex(request, ticker)
 		else:
 			return IEXC._request_stocks(request, ticker)
 
 	@classmethod
 	def _request_stocks(cls, request, ticker):
-		exchange = Exchange.from_dict(ticker.get("exchange"))
+		exchange = ticker["exchange"]
+
+		if not exchange:
+			return None, None
 
 		try:
-			if ticker.get("quote") is None and exchange is not None: return None, f"Price for `{ticker.get('name')}` is not available on {exchange.name}."
+			if ticker.get("quote") is None: return None, f"Price for `{ticker.get('name')}` is not available on {exchange['name']}."
 			stock = Stock(ticker.get("symbol"), token=environ["IEXC_KEY"])
 			rawData = stock.get_quote().loc[ticker.get("symbol")]
 			if rawData is None or (rawData["latestPrice"] is None and rawData["delayedPrice"] is None): return None, None
@@ -52,7 +54,7 @@ class IEXC(AbstractProvider):
 			"change": "{:+.2f} %".format(priceChange),
 			"thumbnailUrl": coinThumbnail,
 			"messageColor": "amber" if priceChange == 0 else ("green" if priceChange > 0 else "red"),
-			"sourceText": f"Price on {exchange.name}",
+			"sourceText": f"{ticker['id']} data on {exchange['name']}",
 			"platform": "IEXC",
 			"raw": {
 				"quotePrice": [price],
@@ -95,16 +97,18 @@ class IEXC(AbstractProvider):
 
 	@classmethod
 	def _request_depth(cls, request, ticker):
-		if ticker.get("exchange").get("id") == "fx":
-			return None, "Orderbook visualizations are not available for forex markets."
+		exchange = ticker["exchange"]
 
-		exchange = Exchange.from_dict(ticker.get("exchange"))
+		if exchange.get("id") == "fx":
+			return None, "Orderbook visualizations are not available for forex markets."
+		if not exchange:
+			return None, None
 
 		preferences = request.get("preferences")
 		forceMode = {"id": "force", "value": "force"} in preferences
 
 		try:
-			if ticker.get("quote") is None and exchange is not None: return None, f"Orderbook visualization for `{ticker.get('name')}` is not available on {exchange.get('name')}."
+			if ticker.get("quote") is None and exchange is not None: return None, f"Orderbook visualization for `{ticker['name']}` is not available on {exchange['name']}."
 			stock = Stock(ticker.get("symbol"), token=environ["IEXC_KEY"])
 			depthData = stock.get_book()[ticker.get("symbol")]
 			if not depthData["quote"].get("isUSMarketOpen", True): return None, "US stock market is currently not open."

@@ -8,8 +8,8 @@ from traceback import format_exc
 
 from PIL import Image
 
-from TickerParser import Exchange
 from components.abstract import AbstractProvider
+import ccxt
 from components.coingecko import CoinGecko
 from assets import static_storage
 
@@ -22,20 +22,23 @@ class CCXT(AbstractProvider):
 
 	@classmethod
 	def _request_quote(cls, request, ticker):
-		exchange = Exchange.from_dict(ticker.get("exchange"))
+		exchange = ticker["exchange"]
 
-		if exchange is None: return None, None
+		if not exchange:
+			return None, None
 
-		tf, limitTimestamp, candleOffset = CCXT.get_highest_supported_timeframe(exchange.properties, datetime.now().astimezone(utc))
+		ccxtInstance = getattr(ccxt, exchange["id"])()
+		tf, limitTimestamp, candleOffset = CCXT.get_highest_supported_timeframe(ccxtInstance, datetime.now().astimezone(utc))
+
 		try:
-			rawData = exchange.properties.fetch_ohlcv(ticker.get("symbol"), timeframe=tf.lower(), since=limitTimestamp, limit=300)
+			rawData = ccxtInstance.fetch_ohlcv(ticker.get("symbol"), timeframe=tf.lower(), since=limitTimestamp, limit=300)
 			if len(rawData) == 0 or rawData[-1][4] is None or rawData[0][1] is None: return None, None
 		except:
 			print(format_exc())
-			return None, f"Data from {exchange.name} is currently unavailable."
+			return None, f"Data from {exchange['name']} is currently unavailable."
 
 		price = [rawData[-1][4], rawData[0][1]] if len(rawData) < candleOffset else [rawData[-1][4], rawData[-candleOffset][1]]
-		volume = None if price[0] is None else sum([candle[5] for candle in rawData if int(candle[0] / 1000) >= int(exchange.properties.milliseconds() / 1000) - 86400]) / (price[0] if exchange.id == "bitmex" else 1)
+		volume = None if price[0] is None else sum([candle[5] for candle in rawData if int(candle[0] / 1000) >= int(ccxtInstance.milliseconds() / 1000) - 86400]) / (price[0] if exchange["id"] == "bitmex" else 1)
 		priceChange = 0 if tf == "1m" or price[1] == 0 else (price[0] / price[1]) * 100 - 100
 		coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")
 
@@ -46,7 +49,7 @@ class CCXT(AbstractProvider):
 			"change": "{:+.2f} %".format(priceChange),
 			"thumbnailUrl": coinThumbnail,
 			"messageColor": "amber" if priceChange == 0 else ("green" if priceChange > 0 else "red"),
-			"sourceText": f"Data from {exchange.name}",
+			"sourceText": f"{ticker['id']} data from {exchange['name']}",
 			"platform": CCXT.name,
 			"raw": {
 				"quotePrice": [price[0]] if tf == "1m" else price[:1],
@@ -59,15 +62,17 @@ class CCXT(AbstractProvider):
 
 	@classmethod
 	def _request_depth(cls, request, ticker):
-		exchange = Exchange.from_dict(ticker.get("exchange"))
+		exchange = ticker["exchange"]
 
+		if exchange is None:
+			return None, None
+
+		ccxtInstance = getattr(ccxt, exchange["id"])()
 		preferences = request.get("preferences")
 		forceMode = {"id": "force", "value": "force"} in preferences
 
-		if exchange is None: return None, None
-
 		try:
-			depthData = exchange.properties.fetch_order_book(ticker.get("symbol"))
+			depthData = ccxtInstance.fetch_order_book(ticker.get("symbol"))
 			bestBid = depthData["bids"][0]
 			bestAsk = depthData["asks"][0]
 			lastPrice = (bestBid[0] + bestAsk[0]) / 2
@@ -93,15 +98,17 @@ class CCXT(AbstractProvider):
 	@classmethod
 	def request_lld(cls, request):
 		ticker = request.get("ticker")
-		exchange = Exchange.from_dict(ticker.get("exchange"))
+		exchange = ticker["exchange"]
 		preferences = request.get("preferences")
 		action = [e.get("value") for e in preferences if e.get("id") == "lld"]
 		if len(action) == 0: return None, None
 		action = action[0]
 
+		ccxtInstance = getattr(ccxt, exchange["id"])()
+
 		if action == "funding":
-			if exchange.id in ["bitmex"]:
-				try: rawData = exchange.properties.public_get_instrument({"symbol": ticker.get("id")})[0]
+			if exchange["id"] in ["bitmex"]:
+				try: rawData = ccxtInstance.public_get_instrument({"symbol": ticker.get("id")})[0]
 				except: return None, f"Requested funding data for `{ticker.get('name')}` is not available."
 
 				if rawData["fundingTimestamp"] is not None:
@@ -122,7 +129,7 @@ class CCXT(AbstractProvider):
 					"change": f"<t:{int(datetime.timestamp(fundingDate))}:R>",
 					"thumbnailUrl": coinThumbnail,
 					"messageColor": "yellow" if averageFundingRate == 0.01 else ("light green" if averageFundingRate < 0.01 else "deep orange"),
-					"sourceText": f"Funding on {exchange.name}",
+					"sourceText": f"Funding on {exchange['name']}",
 					"platform": CCXT.name,
 					"raw": {
 						"quotePrice": [fundingRate, predictedFundingRate],
@@ -132,8 +139,8 @@ class CCXT(AbstractProvider):
 				return payload, None
 			return None, "Funding data is only available on BitMEX."
 		elif action == "oi":
-			if exchange.id in ["bitmex"]:
-				try: rawData = exchange.properties.public_get_instrument({"symbol": ticker.get("id")})[0]
+			if exchange["id"] in ["bitmex"]:
+				try: rawData = ccxtInstance.public_get_instrument({"symbol": ticker.get("id")})[0]
 				except: return None, f"Requested open interest data for `{ticker.get('name')}` is not available."
 
 				coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")
@@ -144,7 +151,7 @@ class CCXT(AbstractProvider):
 					"title": ticker.get("name"),
 					"thumbnailUrl": coinThumbnail,
 					"messageColor": "deep purple",
-					"sourceText": f"Open interest on {exchange.name}",
+					"sourceText": f"Open interest on {exchange['name']}",
 					"platform": CCXT.name,
 					"raw": {
 						"quotePrice": [float(rawData["openInterest"]), float(rawData["openValue"]) / 100000000],
@@ -154,10 +161,10 @@ class CCXT(AbstractProvider):
 				return payload, None
 			return None, "Open interest and open value data is only available on BitMEX."
 		elif action == "ls":
-			if exchange.id in ["bitfinex2"]:
+			if exchange["id"] in ["bitfinex2"]:
 				try:
-					longs = exchange.properties.publicGetStats1KeySizeSymbolLongLast({"key": "pos.size", "size": "1m", "symbol": f"t{ticker.get('id')}", "side": "long", "section": "last"})
-					shorts = exchange.properties.publicGetStats1KeySizeSymbolShortLast({"key": "pos.size", "size": "1m", "symbol": f"t{ticker.get('id')}", "side": "long", "section": "last"})
+					longs = ccxtInstance.publicGetStats1KeySizeSymbolLongLast({"key": "pos.size", "size": "1m", "symbol": f"t{ticker.get('id')}", "side": "long", "section": "last"})
+					shorts = ccxtInstance.publicGetStats1KeySizeSymbolShortLast({"key": "pos.size", "size": "1m", "symbol": f"t{ticker.get('id')}", "side": "long", "section": "last"})
 					ratio = longs[1] / (longs[1] + shorts[1]) * 100
 				except:
 					return None, None
@@ -170,7 +177,7 @@ class CCXT(AbstractProvider):
 					"change": f"in {deltaFundingText}",
 					"thumbnailUrl": coinThumbnail,
 					"messageColor": "deep purple",
-					"sourceText": f"Longs/shorts on {exchange.name}",
+					"sourceText": f"Longs/shorts on {exchange['name']}",
 					"platform": CCXT.name,
 					"raw": {
 						"quotePrice": [longs[1], shorts[1]],

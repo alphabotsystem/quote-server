@@ -40,7 +40,7 @@ class CoinGecko(AbstractProvider):
 			"change": "{:+.2f} %".format(priceChange),
 			"thumbnailUrl": coinThumbnail,
 			"messageColor": "amber" if priceChange == 0 else ("green" if priceChange > 0 else "red"),
-			"sourceText": "Data from CoinGecko",
+			"sourceText": f"{ticker['id']} data from CoinGecko",
 			"platform": "CoinGecko",
 			"raw": {
 				"quotePrice": [price],

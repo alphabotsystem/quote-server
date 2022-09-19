@@ -96,40 +96,6 @@ class AbstractProvider(object):
 	def _request_depth(cls, request, ticker, **kwargs):
 		raise NotImplementedError
 
-	@v_args(inline=True)
-	class CalculateTree(Transformer):
-		from operator import add, sub, mul, truediv as div, neg
-		number = float
-
-		def __init__(self, cls, request, requestType, **kwargs):
-			self.cls = cls
-			self.request = request
-			self.requestType = requestType
-			self.kwargs = kwargs
-			self.vars = {}
-			self.error = None
-
-		def assign_var(self, name, value):
-			self.vars[name] = value
-			return value
-
-		def var(self, name):
-			hashName = dumps(name.value, option=OPT_SORT_KEYS)
-			try:
-				return self.vars[hashName][self.requestType][0]
-			except KeyError:
-				[response, quoteMessage] = self.cls._request_quote(self.request, name.value, **self.kwargs)
-				if not bool(response) or quoteMessage is not None:
-					self.error = quoteMessage
-					return random()
-				else:
-					return self.assign_var(hashName, response["raw"])[self.requestType][0]
-
-	@classmethod
-	def build_tree(cls, l):
-		if l[0] in ["CONSTANT", "NAME"]: return Token(l[0], l[1])
-		else: return Tree(l[0], [cls.build_tree(e) for e in l[1]])
-
 	@classmethod
 	def _generate_depth_image(cls, depthData, bestBid, bestAsk, lastPrice):
 		bidTotal = 0
@@ -203,3 +169,38 @@ class AbstractProvider(object):
 		plt.close(fig)
 		rawImageData.seek(0)
 		return Image.open(rawImageData)
+
+	@v_args(inline=True)
+	class CalculateTree(Transformer):
+		from operator import add, sub, mul, truediv as div, neg
+		number = float
+		exp = pow
+
+		def __init__(self, cls, request, requestType, **kwargs):
+			self.cls = cls
+			self.request = request
+			self.requestType = requestType
+			self.kwargs = kwargs
+			self.vars = {}
+			self.error = None
+
+		def assign_var(self, name, value):
+			self.vars[name] = value
+			return value
+
+		def var(self, name):
+			hashName = dumps(name.value, option=OPT_SORT_KEYS)
+			try:
+				return self.vars[hashName][self.requestType][0]
+			except KeyError:
+				[response, quoteMessage] = self.cls._request_quote(self.request, name.value, **self.kwargs)
+				if not bool(response) or quoteMessage is not None:
+					self.error = quoteMessage
+					return random()
+				else:
+					return self.assign_var(hashName, response["raw"])[self.requestType][0]
+
+	@classmethod
+	def build_tree(cls, l):
+		if l[0] in ["CONSTANT", "NAME"]: return Token(l[0], l[1])
+		else: return Tree(l[0], [cls.build_tree(e) for e in l[1]])
