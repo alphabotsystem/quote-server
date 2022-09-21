@@ -101,6 +101,7 @@ async def run(req: Request):
 
 if __name__ == "__main__":
 	print("[Startup]: Quote Server is online")
-	config = Config(app=app, port=int(environ.get("PORT", 8080)), host="0.0.0.0", loop=loop)
+	# config = Config(app=app, port=int(environ.get("PORT", 8080)), host="0.0.0.0", loop=loop)
+	config = Config(app=app, port=6900, host="0.0.0.0", loop=loop)
 	server = Server(config)
 	loop.run_until_complete(server.serve())
