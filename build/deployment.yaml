@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quote-server
+  namespace: alpha-bot
+  labels:
+    app: quote-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: quote-server
+  template:
+    metadata:
+      labels:
+        app: quote-server
+    spec:
+      containers:
+      - name: quote-server
+        image: us-central1-docker.pkg.dev/nlc-bot-36685/quote-server/production
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "100m"
+        env:
+          - name: PRODUCTION
+            value: "1"
+          - name: IEXC_KEY
+            valueFrom:
+              secretKeyRef:
+                name: alpha-credentials
+                key: IEXC_KEY
+        ports:
+          - containerPort: 6900
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quote-server
+  namespace: alpha-bot
+spec:
+  type: ClusterIP
+  selector:
+    app: quote-server
+  ports:
+    - protocol: TCP
+      port: 6900
+      targetPort: 6900
