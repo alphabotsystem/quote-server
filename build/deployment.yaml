@@ -40,8 +40,10 @@ kind: Service
 metadata:
   name: quote-server
   namespace: alpha-bot
+  annotations:
+    cloud.google.com/load-balancer-type: "Internal"
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: quote-server
   ports:
