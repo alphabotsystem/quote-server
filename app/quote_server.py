@@ -5,7 +5,7 @@ from time import time, sleep
 from uuid import uuid4
 from fastapi import FastAPI, Request
 from uvicorn import Config, Server
-from asyncio import new_event_loop, set_event_loop, create_task
+from asyncio import new_event_loop, set_event_loop
 from traceback import format_exc
 
 from google.cloud.error_reporting import Client as ErrorReportingClient
