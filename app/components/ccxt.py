@@ -31,7 +31,7 @@ class CCXT(AbstractProvider):
 		tf, limitTimestamp, candleOffset = CCXT.get_highest_supported_timeframe(ccxtInstance, datetime.now().astimezone(utc))
 
 		try:
-			rawData = ccxtInstance.fetch_ohlcv(ticker.get("symbol"), timeframe=tf.lower(), since=limitTimestamp, limit=150)
+			rawData = ccxtInstance.fetch_ohlcv(ticker.get("symbol"), timeframe=tf, since=limitTimestamp, limit=150)
 			if len(rawData) == 0 or rawData[-1][4] is None or rawData[0][1] is None: return None, None
 		except:
 			print(format_exc())
@@ -217,20 +217,20 @@ class CCXT(AbstractProvider):
 		rolling24h = (int(exchange.milliseconds() / 1000) - 86400) * 1000
 		availableTimeframes = ["10m", "15m", "20m", "30m", "1h", "2h", "3h", "4h", "6h", "8h", "12h", "1d"]
 		for tf in availableTimeframes:
-			if tf.lower() in exchange.timeframes:
+			if tf in exchange.timeframes:
 				return tf, rolling24h, ceil(int((exchange.milliseconds() - dailyOpen) / 1000) / CCXT.get_frequency_time(tf))
 		return ("1m", int(exchange.milliseconds() / 1000) - 60, 2)
 
 	@staticmethod
 	def get_frequency_time(t):
-		if t == "1D": return 86400
-		elif t == "12H": return 43200
-		elif t == "8H": return 28800
-		elif t == "6H": return 21600
-		elif t == "4H": return 14400
-		elif t == "3H": return 10800
-		elif t == "2H": return 7200
-		elif t == "1H": return 3600
+		if t == "1d": return 86400
+		elif t == "12h": return 43200
+		elif t == "8h": return 28800
+		elif t == "6h": return 21600
+		elif t == "4h": return 14400
+		elif t == "3h": return 10800
+		elif t == "2h": return 7200
+		elif t == "1h": return 3600
 		elif t == "30m": return 1800
 		elif t == "20m": return 1200
 		elif t == "15m": return 900
