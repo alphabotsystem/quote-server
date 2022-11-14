@@ -6,7 +6,7 @@ COPY ./build/requirements.txt ./
 RUN pip install -r ./requirements.txt
 
 # Copy source code
-COPY ./app ./
+COPY ./src ./
 
 # Run
 ENTRYPOINT ["python", "quote_server.py"]
