@@ -198,5 +198,5 @@ class AbstractProvider(object):
 
 	@classmethod
 	def build_tree(cls, l):
-		if l[0] in ["CONSTANT", "NAME"]: return Token(l[0], l[1])
+		if l[0] in ["CONSTANT", "NAME", "QUOTED"]: return Token(l[0], l[1])
 		else: return Tree(l[0], [cls.build_tree(e) for e in l[1]])
