@@ -4,7 +4,6 @@ from io import BytesIO
 from random import random
 from orjson import dumps, OPT_SORT_KEYS
 
-from google.cloud.storage import Client as StorageClient
 from PIL import Image
 from matplotlib import pyplot as plt
 from matplotlib import ticker as tkr
@@ -13,8 +12,6 @@ from lark import Tree, Token, Transformer, v_args
 
 from assets import static_storage
 
-
-storage_client = StorageClient()
 
 plt.switch_backend("Agg")
 plt.ion()
@@ -26,7 +23,6 @@ plt.rcParams['savefig.facecolor'] = "#131722"
 
 class AbstractProvider(object):
 	__metaclass__ = ABCMeta
-	bucket = storage_client.get_bucket("nlc-bot-36685.appspot.com")
 
 	@classmethod
 	def request_quote(cls, request, **kwargs):
