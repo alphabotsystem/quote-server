@@ -89,6 +89,8 @@ class CCXT(AbstractProvider):
 
 		payload = {
 			"data": imageData.decode(),
+			"width": 1600,
+			"height": 1200,
 			"platform": "CCXT"
 		}
 
