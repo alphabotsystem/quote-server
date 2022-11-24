@@ -38,8 +38,6 @@ async def request_quote(request):
 			payload, message = await loop.run_in_executor(None, CCXT.request_quote, currentRequest)
 		elif platform == "IEXC":
 			payload, message = await loop.run_in_executor(None, IEXC.request_quote, currentRequest)
-		elif platform == "LLD":
-			payload, message = await loop.run_in_executor(None, CCXT.request_lld, currentRequest)
 
 		if bool(payload):
 			return {"response": payload, "message": message}

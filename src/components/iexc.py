@@ -28,7 +28,6 @@ class IEXC(AbstractProvider):
 	@classmethod
 	def _request_stocks(cls, request, ticker):
 		exchange = ticker["exchange"]
-
 		if not exchange:
 			return None, None
 
@@ -98,14 +97,10 @@ class IEXC(AbstractProvider):
 	@classmethod
 	def _request_depth(cls, request, ticker):
 		exchange = ticker["exchange"]
-
 		if exchange.get("id") == "forex":
 			return None, "Orderbook visualizations are not available for forex markets."
 		if not exchange:
 			return None, None
-
-		preferences = request.get("preferences")
-		forceMode = {"id": "force", "value": "force"} in preferences
 
 		try:
 			if ticker.get("quote") is None and exchange is not None: return None, f"Orderbook visualization for `{ticker['name']}` is not available on {exchange['name']}."
