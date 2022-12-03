@@ -18,7 +18,7 @@ class Alternativeme(AbstractProvider):
 			"quoteConvertedPrice": f"≈ {r['data'][0]['value_classification'].lower()}",
 			"title": "Crypto market Fear & Greed Index",
 			"change": "{:+.0f} since yesterday".format(fearGreedIndex - int(r["data"][1]["value"])),
-			"thumbnailUrl": static_storage.icon,
+			"thumbnailUrl": "https://alternative.me/images/alternative-me-logo.png",
 			"messageColor": "deep purple",
 			"sourceText": "Data provided by Alternative.me",
 			"platform": Alternativeme.name,

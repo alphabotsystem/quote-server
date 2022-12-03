@@ -26,7 +26,7 @@ class CNNBusiness(AbstractProvider):
 			"quoteConvertedPrice": f"≈ {r['fear_and_greed']['rating']}",
 			"title": "Stock market Fear & Greed Index",
 			"change": "{:+.0f} since yesterday".format(fearGreedIndex - int(r["fear_and_greed"]["previous_close"])),
-			"thumbnailUrl": static_storage.icon,
+			"thumbnailUrl": "https://cdn1.iconfinder.com/data/icons/metro-ui-dock-icon-set--icons-by-dakirby/512/CNN.png",
 			"messageColor": "deep purple",
 			"sourceText": "Data provided by Alternative.me",
 			"platform": CNNBusiness.name,
