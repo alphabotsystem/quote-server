@@ -52,8 +52,8 @@ class AbstractProvider(object):
 				"title": ticker.get("name"),
 				"thumbnailUrl": static_storage.icon,
 				"messageColor": "amber",
-				"sourceText": "Data provided by Alpha",
-				"platform": "Alpha",
+				"sourceText": "Data provided by Alpha Bot",
+				"platform": "Alpha Bot",
 				"raw": {
 					"quotePrice": [price],
 					"quoteVolume": [volume],
