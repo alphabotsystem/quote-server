@@ -9,4 +9,4 @@ RUN pip install -r ./requirements.txt
 COPY ./src ./
 
 # Run
-ENTRYPOINT ["python", "quote_server.py"]
+ENTRYPOINT ["python", "-u", "quote_server.py"]
