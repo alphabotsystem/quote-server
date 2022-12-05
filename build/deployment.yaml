@@ -31,6 +31,11 @@ spec:
               secretKeyRef:
                 name: alpha-credentials
                 key: IEXC_KEY
+          - name: PROXY_IP
+            valueFrom:
+              secretKeyRef:
+                name: alpha-credentials
+                key: PROXY_IP
         ports:
           - containerPort: 6900
 

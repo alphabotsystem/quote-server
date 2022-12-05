@@ -1,3 +1,4 @@
+from os import environ
 from time import time
 from io import BytesIO
 from math import ceil
@@ -30,7 +31,28 @@ class CCXT(AbstractProvider):
 		if not exchange:
 			return None, None
 
-		ccxtInstance = getattr(ccxt, exchange["id"])()
+		print(environ["PROXY_IP"])
+		if exchange["id"] == "binance":
+			ccxtInstance = ccxt.binance({
+				"proxies": {
+					"http": f"http://{environ['PROXY_IP']}/api/"
+				}
+			})
+		elif exchange["id"] == "binanceusdm":
+			ccxtInstance = ccxt.binanceusdm({
+				"proxies": {
+					"http": f"http://{environ['PROXY_IP']}/fapi/"
+				}
+			})
+		elif exchange["id"] == "binancecoinm":
+			ccxtInstance = ccxt.binancecoinm({
+				"proxies": {
+					"http": f"http://{environ['PROXY_IP']}/dapi/"
+				}
+			})
+		else:
+			ccxtInstance = getattr(ccxt, exchange["id"])()
+
 		tf, limitTimestamp, candleOffset = CCXT.get_highest_supported_timeframe(ccxtInstance, datetime.now().astimezone(utc))
 
 		if action == "funding":
@@ -165,7 +187,26 @@ class CCXT(AbstractProvider):
 		if exchange is None:
 			return None, None
 
-		ccxtInstance = getattr(ccxt, exchange["id"])()
+		if exchange["id"] == "binance":
+			ccxtInstance = ccxt.binance({
+				"proxies": {
+					"http": f"http://{environ['PROXY_IP']}/api/"
+				}
+			})
+		elif exchange["id"] == "binanceusdm":
+			ccxtInstance = ccxt.binanceusdm({
+				"proxies": {
+					"http": f"http://{environ['PROXY_IP']}/fapi/"
+				}
+			})
+		elif exchange["id"] == "binancecoinm":
+			ccxtInstance = ccxt.binancecoinm({
+				"proxies": {
+					"http": f"http://{environ['PROXY_IP']}/dapi/"
+				}
+			})
+		else:
+			ccxtInstance = getattr(ccxt, exchange["id"])()
 
 		try:
 			depthData = ccxtInstance.fetch_order_book(ticker.get("symbol"))
