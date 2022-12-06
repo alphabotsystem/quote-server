@@ -32,29 +32,14 @@ class CCXT(AbstractProvider):
 			return None, None
 
 		if exchange["id"] == "binance":
-			ccxtInstance = ccxt.binance({
-				"proxies": {
-					"http": f"http://{environ['PROXY_IP']}/api/",
-					"https": f"http://{environ['PROXY_IP']}/api/"
-				},
-				"verify": False
-			})
+			ccxtInstance = ccxt.binance()
+			ccxtInstance.proxy = f"http://{environ['PROXY_IP']}/"
 		elif exchange["id"] == "binanceusdm":
-			ccxtInstance = ccxt.binanceusdm({
-				"proxies": {
-					"http": f"http://{environ['PROXY_IP']}/fapi/",
-					"https": f"http://{environ['PROXY_IP']}/fapi/"
-				},
-				"verify": False
-			})
+			ccxtInstance = ccxt.binanceusdm()
+			ccxtInstance.proxy = f"http://{environ['PROXY_IP']}/"
 		elif exchange["id"] == "binancecoinm":
-			ccxtInstance = ccxt.binancecoinm({
-				"proxies": {
-					"http": f"http://{environ['PROXY_IP']}/dapi/",
-					"https": f"http://{environ['PROXY_IP']}/dapi/"
-				},
-				"verify": False
-			})
+			ccxtInstance = ccxt.binancecoinm()
+			ccxtInstance.proxy = f"http://{environ['PROXY_IP']}/"
 		else:
 			ccxtInstance = getattr(ccxt, exchange["id"])()
 
