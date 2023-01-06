@@ -8,12 +8,21 @@ from base64 import decodebytes, b64encode
 from traceback import format_exc
 
 from PIL import Image
+from google.cloud import bigquery
 
 from components.abstract import AbstractProvider
 import ccxt
 from ccxt.base.errors import NotSupported, BadSymbol
 from components.coingecko import CoinGecko
 from assets import static_storage
+
+client = bigquery.Client()
+
+
+CCXT_TO_CACHE_MAP = {
+	"binance": ("binance", "s"),
+	"binanceusdm": ("binance", "f"),
+}
 
 
 class CCXT(AbstractProvider):
@@ -30,6 +39,7 @@ class CCXT(AbstractProvider):
 		exchange = ticker["exchange"]
 		if not exchange:
 			return None, None
+		bqExchangeId, bqMarket = CCXT_TO_CACHE_MAP.get(exchange["id"], (None, None))
 
 		if exchange["id"] == "binance":
 			ccxtInstance = ccxt.binance()
@@ -135,6 +145,54 @@ class CCXT(AbstractProvider):
 				}
 				return payload, None
 			return None, "Longs and shorts data is only available on Bitfinex."
+
+		elif bqExchangeId is not None:
+			query = f"""
+				WITH t1 AS (
+					SELECT price AS close FROM `nlc-bot-36685.orderflow.crypto`
+					WHERE symbol="{ticker.get('id')}" AND exchange="{bqExchangeId}" AND market="{bqMarket}"
+					ORDER BY timestamp DESC LIMIT 1
+				), t2 AS (
+					SELECT price AS open FROM `nlc-bot-36685.orderflow.crypto`
+					WHERE symbol="{ticker.get('id')}" AND exchange="{bqExchangeId}" AND market="{bqMarket}" AND timestamp > UNIX_MILLIS(CURRENT_TIMESTAMP())-86400*1000
+					ORDER BY timestamp ASC LIMIT 1
+				), t3 AS (
+					SELECT MAX(price) AS high, MIN(price) AS low, SUM(qty) AS volume FROM `nlc-bot-36685.orderflow.crypto`
+					WHERE symbol="{ticker.get('id')}" AND exchange="{bqExchangeId}" AND market="{bqMarket}" AND timestamp > UNIX_MILLIS(CURRENT_TIMESTAMP())-86400*1000
+				)
+				SELECT t2.open, t3.high, t3.low, t1.close, t3.volume FROM t1, t2, t3
+			"""
+			query_job = client.query(query)
+			results = list(query_job.result())
+
+			if len(results) == 0: return None, None
+
+			openPrice = results[0]['open']
+			highPrice = results[0]['high']
+			lowPrice = results[0]['low']
+			closePrice = results[0]['close']
+			volume = results[0]['volume']
+
+			priceChange = (closePrice / openPrice) * 100 - 100
+			coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")
+
+			payload = {
+				"quotePrice": "{:,.10f}".format(closePrice).rstrip('0').rstrip('.') + " " + ticker.get("quote"),
+				"quoteVolume": "{:,.4f}".format(volume).rstrip('0').rstrip('.') + " " + ticker.get("base"),
+				"title": ticker.get("name"),
+				"change": "{:+.2f} %".format(priceChange),
+				"thumbnailUrl": coinThumbnail,
+				"messageColor": "amber" if priceChange == 0 else ("green" if priceChange > 0 else "red"),
+				"sourceText": f"{ticker['id']} data from {exchange['name']}",
+				"platform": CCXT.name,
+				"raw": {
+					"quotePrice": [closePrice, openPrice],
+					"quoteVolume": [volume],
+					"timestamp": time()
+				}
+			}
+
+			return payload, None
 
 		else:
 			try:
