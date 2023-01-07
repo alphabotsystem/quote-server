@@ -20,8 +20,9 @@ client = bigquery.Client()
 
 
 CCXT_TO_CACHE_MAP = {
-	"binance": ("binance", "s"),
-	"binanceusdm": ("binance", "f"),
+	# "binance": ("binance", "s"),
+	# "binanceusdm": ("binance", "f"),
+	# "binancecoinm": ("binance", "i"),
 }
 
 
