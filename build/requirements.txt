@@ -1,6 +1,6 @@
 google-cloud-error-reporting>=1.6.3
 google-cloud-firestore>=2.7.2
-google-cloud-bigquery>=3.4.1
+elasticsearch>=8.4.3
 fastapi>=0.85.1
 uvicorn[standard]>=0.19.0
 ccxt>=2.0.69

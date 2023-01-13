@@ -8,7 +8,7 @@ from base64 import decodebytes, b64encode
 from traceback import format_exc
 
 from PIL import Image
-from google.cloud import bigquery
+from elasticsearch import Elasticsearch
 
 from components.abstract import AbstractProvider
 import ccxt
@@ -16,13 +16,17 @@ from ccxt.base.errors import NotSupported, BadSymbol
 from components.coingecko import CoinGecko
 from assets import static_storage
 
-client = bigquery.Client()
+
+elasticsearch = Elasticsearch(
+	cloud_id=environ["ELASTICSEARCH_CLOUD_ID"],
+	api_key=environ["ELASTICSEARCH_API_KEY"],
+)
 
 
 CCXT_TO_CACHE_MAP = {
-	# "binance": ("binance", "s"),
-	# "binanceusdm": ("binance", "f"),
-	# "binancecoinm": ("binance", "i"),
+	"binance": "binance:s:",
+	# "binanceusdm": "binance:f:",
+	# "binancecoinm": "binance:i:",
 }
 
 
@@ -40,7 +44,7 @@ class CCXT(AbstractProvider):
 		exchange = ticker["exchange"]
 		if not exchange:
 			return None, None
-		bqExchangeId, bqMarket = CCXT_TO_CACHE_MAP.get(exchange["id"], (None, None))
+		esDocId = CCXT_TO_CACHE_MAP.get(exchange["id"])
 
 		if exchange["id"] == "binance":
 			ccxtInstance = ccxt.binance()
@@ -147,39 +151,20 @@ class CCXT(AbstractProvider):
 				return payload, None
 			return None, "Longs and shorts data is only available on Bitfinex."
 
-		elif bqExchangeId is not None:
-			query = f"""
-				WITH t1 AS (
-					SELECT price AS close FROM `nlc-bot-36685.orderflow.crypto`
-					WHERE symbol="{ticker.get('id')}" AND exchange="{bqExchangeId}" AND market="{bqMarket}"
-					ORDER BY timestamp DESC LIMIT 1
-				), t2 AS (
-					SELECT price AS open FROM `nlc-bot-36685.orderflow.crypto`
-					WHERE symbol="{ticker.get('id')}" AND exchange="{bqExchangeId}" AND market="{bqMarket}" AND timestamp > UNIX_MILLIS(CURRENT_TIMESTAMP())-86400*1000
-					ORDER BY timestamp ASC LIMIT 1
-				), t3 AS (
-					SELECT MAX(price) AS high, MIN(price) AS low, SUM(qty) AS volume FROM `nlc-bot-36685.orderflow.crypto`
-					WHERE symbol="{ticker.get('id')}" AND exchange="{bqExchangeId}" AND market="{bqMarket}" AND timestamp > UNIX_MILLIS(CURRENT_TIMESTAMP())-86400*1000
-				)
-				SELECT t2.open, t3.high, t3.low, t1.close, t3.volume FROM t1, t2, t3
-			"""
-			query_job = client.query(query)
-			results = list(query_job.result())
+		elif esDocId is not None:
+			# Get document by id
+			response = elasticsearch.search(index="cache", body={"query": {"match": {"_id": esDocId + ticker.get("id")}}})
+			if len(response["hits"]["hits"]) == 0:
+				return None, None
 
-			if len(results) == 0: return None, None
+			data = response["hits"]["hits"][0]["_source"]
 
-			openPrice = results[0]['open']
-			highPrice = results[0]['high']
-			lowPrice = results[0]['low']
-			closePrice = results[0]['close']
-			volume = results[0]['volume']
-
-			priceChange = (closePrice / openPrice) * 100 - 100
+			priceChange = (data["close"] / data["open"]) * 100 - 100
 			coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")
 
 			payload = {
-				"quotePrice": "{:,.10f}".format(closePrice).rstrip('0').rstrip('.') + " " + ticker.get("quote"),
-				"quoteVolume": "{:,.4f}".format(volume).rstrip('0').rstrip('.') + " " + ticker.get("base"),
+				"quotePrice": "{:,.10f}".format(data["close"]).rstrip('0').rstrip('.') + " " + ticker.get("quote"),
+				"quoteVolume": "{:,.4f}".format(data["volume"]).rstrip('0').rstrip('.') + " " + ticker.get("base"),
 				"title": ticker.get("name"),
 				"change": "{:+.2f} %".format(priceChange),
 				"thumbnailUrl": coinThumbnail,
@@ -187,8 +172,8 @@ class CCXT(AbstractProvider):
 				"sourceText": f"{ticker['id']} data from {exchange['name']}",
 				"platform": CCXT.name,
 				"raw": {
-					"quotePrice": [closePrice, openPrice],
-					"quoteVolume": [volume],
+					"quotePrice": [data["open"], data["close"]],
+					"quoteVolume": [data["volume"]],
 					"timestamp": time()
 				}
 			}

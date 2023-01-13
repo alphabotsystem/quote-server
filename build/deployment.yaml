@@ -31,6 +31,16 @@ spec:
               secretKeyRef:
                 name: alpha-credentials
                 key: IEXC_KEY
+          - name: ELASTICSEARCH_CLOUD_ID
+            valueFrom:
+              secretKeyRef:
+                name: alpha-credentials
+                key: ELASTICSEARCH_CLOUD_ID
+          - name: ELASTICSEARCH_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: alpha-credentials
+                key: ELASTICSEARCH_API_KEY
           - name: PROXY_IP
             valueFrom:
               secretKeyRef:
