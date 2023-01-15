@@ -25,7 +25,7 @@ elasticsearch = Elasticsearch(
 
 CCXT_TO_CACHE_MAP = {
 	"binance": "binance:s:",
-	# "binanceusdm": "binance:f:",
+	"binanceusdm": "binance:f:",
 	# "binancecoinm": "binance:i:",
 }
 
