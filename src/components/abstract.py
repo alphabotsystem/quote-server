@@ -52,8 +52,8 @@ class AbstractProvider(object):
 				"title": ticker.get("name"),
 				"thumbnailUrl": static_storage.icon,
 				"messageColor": "amber",
-				"sourceText": "Data provided by Alpha Bot",
-				"platform": "Alpha Bot",
+				"sourceText": "Data provided by Alpha.bot",
+				"platform": "Alpha.bot",
 				"raw": {
 					"quotePrice": [price],
 					"quoteVolume": [volume],
@@ -63,7 +63,7 @@ class AbstractProvider(object):
 			quoteMessage = None
 		else:
 			[payload, quoteMessage] = cls._request_quote(request, ticker, **kwargs)
-		
+
 		return payload, quoteMessage
 
 	@classmethod
