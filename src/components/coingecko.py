@@ -1,3 +1,4 @@
+from os import environ
 from time import time
 from traceback import format_exc
 
@@ -10,7 +11,7 @@ from assets import static_storage
 
 class CoinGecko(AbstractProvider):
 	name = "CoinGecko"
-	connection = CoinGeckoAPI()
+	connection = CoinGeckoAPI(api_key=environ["COINGECKO_API_KEY"])
 
 	@classmethod
 	def _request_quote(cls, request, ticker):
