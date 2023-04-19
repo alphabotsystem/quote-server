@@ -47,14 +47,26 @@ class CCXT(AbstractProvider):
 		esDocId = CCXT_TO_CACHE_MAP.get(exchange["id"])
 
 		if exchange["id"] == "binance":
-			ccxtInstance = ccxt.binance()
-			ccxtInstance.proxy = f"http://{environ['PROXY_IP']}/"
+			ccxtInstance = ccxt.binance({
+				"proxies": {
+					"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+					"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				}
+			})
 		elif exchange["id"] == "binanceusdm":
-			ccxtInstance = ccxt.binanceusdm()
-			ccxtInstance.proxy = f"http://{environ['PROXY_IP']}/"
+			ccxtInstance = ccxt.binanceusdm({
+				"proxies": {
+					"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+					"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				}
+			})
 		elif exchange["id"] == "binancecoinm":
-			ccxtInstance = ccxt.binancecoinm()
-			ccxtInstance.proxy = f"http://{environ['PROXY_IP']}/"
+			ccxtInstance = ccxt.binancecoinm({
+				"proxies": {
+					"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+					"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				}
+			})
 		else:
 			ccxtInstance = getattr(ccxt, exchange["id"])()
 
@@ -224,26 +236,23 @@ class CCXT(AbstractProvider):
 		if exchange["id"] == "binance":
 			ccxtInstance = ccxt.binance({
 				"proxies": {
-					"http": f"http://{environ['PROXY_IP']}/api/",
-					"https": f"http://{environ['PROXY_IP']}/api/"
-				},
-				"verify": False
+					"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+					"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				}
 			})
 		elif exchange["id"] == "binanceusdm":
 			ccxtInstance = ccxt.binanceusdm({
 				"proxies": {
-					"http": f"http://{environ['PROXY_IP']}/fapi/",
-					"https": f"http://{environ['PROXY_IP']}/fapi/"
-				},
-				"verify": False
+					"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+					"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				}
 			})
 		elif exchange["id"] == "binancecoinm":
 			ccxtInstance = ccxt.binancecoinm({
 				"proxies": {
-					"http": f"http://{environ['PROXY_IP']}/dapi/",
-					"https": f"http://{environ['PROXY_IP']}/dapi/"
-				},
-				"verify": False
+					"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+					"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				}
 			})
 		else:
 			ccxtInstance = getattr(ccxt, exchange["id"])()

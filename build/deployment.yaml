@@ -51,6 +51,11 @@ spec:
               secretKeyRef:
                 name: alpha-credentials
                 key: PROXY_IP
+          - name: PROXY_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: alpha-credentials
+                key: PROXY_AUTH
         ports:
           - containerPort: 6900
 
