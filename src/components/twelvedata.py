@@ -82,8 +82,6 @@ class Twelvedata(AbstractProvider):
 
 	@classmethod
 	def _request_forex(cls, request, ticker):
-		print(ticker)
-
 		try:
 			rawData = td.exchange_rate(
 				symbol=ticker.get("symbol")
