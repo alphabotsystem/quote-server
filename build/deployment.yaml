@@ -31,6 +31,11 @@ spec:
               secretKeyRef:
                 name: alpha-credentials
                 key: IEXC_KEY
+          - name: TWELVEDATA_KEY
+            valueFrom:
+              secretKeyRef:
+                name: alpha-credentials
+                key: TWELVEDATA_KEY
           - name: COINGECKO_API_KEY
             valueFrom:
               secretKeyRef:
