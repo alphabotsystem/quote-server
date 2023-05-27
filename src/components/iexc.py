@@ -54,7 +54,7 @@ class IEXC(AbstractProvider):
 			"data": imageData.decode(),
 			"width": 1600,
 			"height": 1200,
-			"platform": "IEXC"
+			"platform": IEXC.name,
 		}
 
 		return payload, None

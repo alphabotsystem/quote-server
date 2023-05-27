@@ -20,27 +20,26 @@ class Twelvedata(AbstractProvider):
 
 	@classmethod
 	def _request_quote(cls, request, ticker):
+		if ticker["exchange"].get("id") == "forex":
+			return Twelvedata._request_forex(request, ticker)
+		else:
+			return Twelvedata._request_stocks(request, ticker)
+
+	@classmethod
+	def _request_stocks(cls, request, ticker):
 		exchange = ticker["exchange"]
 		if not exchange:
 			return None, None
 
 		try:
 			if ticker.get("quote") is None: return None, f"Price for `{ticker.get('name')}` is not available on {exchange['name']}."
-			if exchange.get("id") is not None and exchange["id"] != "forex":
-				rawData = td.time_series(
-					symbol=ticker.get("symbol"),
-					exchange=exchange.get("name"),
-					interval="1day",
-					outputsize=2,
-					timezone="UTC",
-				).as_pandas()
-			else:
-				rawData = td.time_series(
-					symbol=ticker.get("symbol"),
-					interval="1day",
-					outputsize=2,
-					timezone="UTC",
-				).as_pandas()
+			rawData = td.time_series(
+				symbol=ticker.get("symbol"),
+				exchange=exchange.get("name"),
+				interval="1day",
+				outputsize=2,
+				timezone="UTC",
+			).as_pandas()
 			if rawData is None: return None, None
 		except:
 			print(format_exc())
@@ -64,17 +63,47 @@ class Twelvedata(AbstractProvider):
 		priceChange = ((price[0] / price[1] - 1) * 100) if len(price) > 1 else 0
 
 		payload = {
-			"quotePrice": "{:,.10f}".format(price[0]).rstrip('0').rstrip('.') + (" USD" if ticker.get("quote") is None else (" " + ticker.get("quote"))),
+			"quotePrice": "{:,.10f}".format(price[0]).rstrip('0').rstrip('.') + " " + ticker.get("quote"),
 			"quoteVolume": "{:,.4f}".format(volume[0]).rstrip('0').rstrip('.') + " " + ticker.get("base"),
 			"title": ticker.get("name"),
 			"change": "{:+.2f} %".format(priceChange),
 			"thumbnailUrl": stockLogoThumbnail,
 			"messageColor": "amber" if priceChange == 0 else ("green" if priceChange > 0 else "red"),
 			"sourceText": f"{ticker['id']} data on {exchange['name']}",
-			"platform": "Twelvedata",
+			"platform": Twelvedata.name,
 			"raw": {
 				"quotePrice": price,
 				"quoteVolume": volume,
+				"timestamp": time()
+			}
+		}
+
+		return payload, None
+
+	@classmethod
+	def _request_forex(cls, request, ticker):
+		print(ticker)
+
+		try:
+			rawData = td.exchange_rate(
+				symbol=ticker.get("symbol")
+			).as_json()
+			if rawData is None: return None, None
+		except:
+			print(format_exc())
+			return None, None
+
+		price = rawData["rate"]
+
+		payload = {
+			"quotePrice": "{:,.10f}".format(price).rstrip('0').rstrip('.') + " " + ticker.get("quote"),
+			"title": ticker.get("name"),
+			"thumbnailUrl": static_storage.icon,
+			"messageColor": "deep purple",
+			"sourceText": f"Data provided by Twelvedata",
+			"platform": Twelvedata.name,
+			"raw": {
+				"quotePrice": [price],
 				"timestamp": time()
 			}
 		}
@@ -157,7 +186,7 @@ class Twelvedata(AbstractProvider):
 				"past 52w": statsData["statistics"]["stock_price_summary"]["fifty_two_week_change"] * 100
 			},
 			"sourceText": "Data provided by Twelvedata",
-			"platform": "Twelvedata",
+			"platform": Twelvedata.name,
 		}
 
 		if stockLogoThumbnail is not None: payload["image"] = stockLogoThumbnail
