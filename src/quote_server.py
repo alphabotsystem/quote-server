@@ -14,6 +14,7 @@ from components.alternativeme import Alternativeme
 from components.cnnbusiness import CNNBusiness
 from components.ccxt import CCXT
 from components.coingecko import CoinGecko
+from components.iexc import IEXC
 from components.twelvedata import Twelvedata
 
 
