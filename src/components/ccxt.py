@@ -2,8 +2,7 @@ from os import environ
 from time import time
 from io import BytesIO
 from math import ceil
-from datetime import datetime
-from pytz import utc
+from datetime import datetime, timezone
 from base64 import decodebytes, b64encode
 from traceback import format_exc
 
@@ -70,7 +69,7 @@ class CCXT(AbstractProvider):
 		else:
 			ccxtInstance = getattr(ccxt, exchange["id"])()
 
-		tf, limitTimestamp, candleOffset = CCXT.get_highest_supported_timeframe(ccxtInstance, datetime.now().astimezone(utc))
+		tf, limitTimestamp, candleOffset = CCXT.get_highest_supported_timeframe(ccxtInstance, datetime.now().astimezone(timezone.utc))
 
 		if action == "funding":
 			try:
@@ -84,9 +83,9 @@ class CCXT(AbstractProvider):
 			fundingRate = rawData["fundingRate"]
 			predictedFundingRate = rawData.get("nextFundingRate")
 			if rawData["fundingTimestamp"] is not None:
-				fundingDate = datetime.fromtimestamp(rawData["fundingTimestamp"] / 1000).astimezone(utc)
+				fundingDate = datetime.fromtimestamp(rawData["fundingTimestamp"] / 1000).astimezone(timezone.utc)
 			elif rawData["fundingDatetime"] is not None:
-				fundingDate = datetime.strptime(rawData["fundingDatetime"], "%Y-%m-%dT%H:%M:00.000Z").replace(tzinfo=utc)
+				fundingDate = datetime.strptime(rawData["fundingDatetime"], "%Y-%m-%dT%H:%M:00.000Z").replace(tzinfo=timezone.utc)
 			else:
 				fundingDate = None
 			averageFundingRate = fundingRate if predictedFundingRate is None else (fundingRate + predictedFundingRate) / 2
