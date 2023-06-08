@@ -63,7 +63,7 @@ class Twelvedata(AbstractProvider):
 		priceChange = ((price[0] / price[1] - 1) * 100) if len(price) > 1 else 0
 
 		payload = {
-			"quotePrice": "{:,.10f}".format(price[0]).rstrip('0').rstrip('.') + " " + ticker.get("quote"),
+			"quotePrice": "{:,.3f}".format(price[0]).rstrip('0').rstrip('.') + " " + ticker.get("quote"),
 			"quoteVolume": "{:,.4f}".format(volume[0]).rstrip('0').rstrip('.') + " " + ticker.get("base"),
 			"title": ticker.get("name"),
 			"change": "{:+.2f} %".format(priceChange),
