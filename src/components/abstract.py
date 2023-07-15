@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 from io import BytesIO
 from random import random
 from orjson import dumps, OPT_SORT_KEYS
+from traceback import format_exc
 
 from PIL import Image
 from matplotlib import pyplot as plt
@@ -34,15 +35,28 @@ class AbstractProvider(object):
 
 		if not ticker.get("isSimple"):
 			priceCalculatorTree = AbstractProvider.CalculateTree(cls, request, "quotePrice", **kwargs)
-			try: price = priceCalculatorTree.transform(tickerTree)
-			except: return None, priceCalculatorTree.error
+			try:
+				price = priceCalculatorTree.transform(tickerTree)
+			except ZeroDivisionError:
+				price = 0
+			except:
+				print(format_exc())
+				return None, priceCalculatorTree.error
+
 			if priceCalculatorTree.error is not None:
 				return None, priceCalculatorTree.error
 
 			volumeCalculatorTree = AbstractProvider.CalculateTree(cls, request, "quoteVolume", **kwargs)
 			volumeCalculatorTree.vars = priceCalculatorTree.vars
-			try: volume = volumeCalculatorTree.transform(tickerTree)
-			except: return None, priceCalculatorTree.error
+
+			try:
+				volume = volumeCalculatorTree.transform(tickerTree)
+			except ZeroDivisionError:
+				volume = 0
+			except:
+				print(format_exc())
+				return None, priceCalculatorTree.error
+
 			if volumeCalculatorTree.error is not None:
 				return None, volumeCalculatorTree.error
 
@@ -194,7 +208,7 @@ class AbstractProvider(object):
 					self.error = quoteMessage
 					return random()
 				else:
-					return self.assign_var(hashName, response["raw"])[self.requestType][0]
+					return self.assign_var(hashName, response["raw"]).get(self.requestType, [0])[0]
 
 	@classmethod
 	def build_tree(cls, l):
