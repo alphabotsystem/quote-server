@@ -7,7 +7,7 @@ from assets import static_storage
 
 class CNNBusiness(AbstractProvider):
 	name = "CNN Business"
-	
+
 	@classmethod
 	def _request_quote(cls, request, ticker):
 		r = get("https://production.dataviz.cnn.io/index/fearandgreed/graphdata", headers={
@@ -22,7 +22,7 @@ class CNNBusiness(AbstractProvider):
 		fearGreedIndex = int(round(r["fear_and_greed"]["score"]))
 
 		payload = {
-			"quotePrice": fearGreedIndex,
+			"quotePrice": str(fearGreedIndex),
 			"quoteConvertedPrice": f"≈ {r['fear_and_greed']['rating']}",
 			"title": "Stock market Fear & Greed Index",
 			"change": "{:+.0f} since yesterday".format(fearGreedIndex - int(r["fear_and_greed"]["previous_close"])),

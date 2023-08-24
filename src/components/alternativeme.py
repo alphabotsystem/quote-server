@@ -7,14 +7,14 @@ from assets import static_storage
 
 class Alternativeme(AbstractProvider):
 	name = "Alternative.me"
-	
+
 	@classmethod
 	def _request_quote(cls, request, ticker):
 		r = get("https://api.alternative.me/fng/?limit=2&format=json").json()
 		fearGreedIndex = int(r["data"][0]["value"])
 
 		payload = {
-			"quotePrice": fearGreedIndex,
+			"quotePrice": str(fearGreedIndex),
 			"quoteConvertedPrice": f"≈ {r['data'][0]['value_classification'].lower()}",
 			"title": "Crypto market Fear & Greed Index",
 			"change": "{:+.0f} since yesterday".format(fearGreedIndex - int(r["data"][1]["value"])),
