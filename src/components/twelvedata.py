@@ -60,7 +60,7 @@ class Twelvedata(AbstractProvider):
 
 		price = rawData["close"].tolist()
 		volume = rawData["volume"].tolist()
-		priceChange = ((price[0] / price[1] - 1) * 100) if len(price) > 1 else 0
+		priceChange = ((price[0] / price[1] - 1) * 100) if len(price) > 1 and price[1] != 0 else 0
 
 		priceText = "{:,.6f}".format(price[0]) if price[0] < 0.5 else "{:,.3f}".format(price[0])
 		payload = {
