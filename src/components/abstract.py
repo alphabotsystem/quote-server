@@ -179,7 +179,7 @@ class AbstractProvider(object):
 		plt.close(fig)
 		rawImageData.seek(0)
 		# return Image.open(rawImageData)
-		return rawImageData
+		return rawImageData.getvalue()
 
 	@v_args(inline=True)
 	class CalculateTree(Transformer):
