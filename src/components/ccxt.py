@@ -31,9 +31,6 @@ CCXT_TO_CACHE_MAP = {
 
 class CCXT(AbstractProvider):
 	name = "CCXT"
-	chartOverlay = {
-		"normal": Image.open("assets/overlays/quotes/depth.png").convert("RGBA")
-	}
 
 	@classmethod
 	def _request_quote(cls, request, ticker):
@@ -264,13 +261,15 @@ class CCXT(AbstractProvider):
 		except:
 			return None, None
 
-		imageBuffer = BytesIO()
-		chartImage = Image.new("RGBA", (1600, 1200))
-		chartImage.paste(CCXT._generate_depth_image(depthData, bestBid, bestAsk, lastPrice))
-		chartImage = Image.alpha_composite(chartImage, CCXT.chartOverlay["normal"])
-		chartImage.save(imageBuffer, format="png")
-		imageData = b64encode(imageBuffer.getvalue())
-		imageBuffer.close()
+		imageData = b64encode(CCXT._generate_depth_image(depthData, bestBid, bestAsk, lastPrice))
+
+		# imageBuffer = BytesIO()
+		# chartImage = Image.new("RGBA", (1600, 1200))
+		# chartImage.paste(CCXT._generate_depth_image(depthData, bestBid, bestAsk, lastPrice))
+		# chartImage = Image.alpha_composite(chartImage, CCXT.chartOverlay["normal"])
+		# chartImage.save(imageBuffer, format="png")
+		# imageData = b64encode(imageBuffer.getvalue())
+		# imageBuffer.close()
 
 		payload = {
 			"data": imageData.decode(),

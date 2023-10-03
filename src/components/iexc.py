@@ -14,9 +14,6 @@ from assets import static_storage
 
 class IEXC(AbstractProvider):
 	name = "IEXC"
-	chartOverlay = {
-		"normal": Image.open("assets/overlays/quotes/depth.png").convert("RGBA")
-	}
 
 	@classmethod
 	def _request_depth(cls, request, ticker):
@@ -42,13 +39,15 @@ class IEXC(AbstractProvider):
 			print(format_exc())
 			return None, None
 
-		imageBuffer = BytesIO()
-		chartImage = Image.new("RGBA", (1600, 1200))
-		chartImage.paste(IEXC._generate_depth_image(depthData, bestBid, bestAsk, lastPrice))
-		chartImage = Image.alpha_composite(chartImage, IEXC.chartOverlay["normal"])
-		chartImage.save(imageBuffer, format="png")
-		imageData = b64encode(imageBuffer.getvalue())
-		imageBuffer.close()
+		imageData = b64encode(IEXC._generate_depth_image(depthData, bestBid, bestAsk, lastPrice))
+
+		# imageBuffer = BytesIO()
+		# chartImage = Image.new("RGBA", (1600, 1200))
+		# chartImage.paste(IEXC._generate_depth_image(depthData, bestBid, bestAsk, lastPrice))
+		# chartImage = Image.alpha_composite(chartImage, IEXC.chartOverlay["normal"])
+		# chartImage.save(imageBuffer, format="png")
+		# imageData = b64encode(imageBuffer.getvalue())
+		# imageBuffer.close()
 
 		payload = {
 			"data": imageData.decode(),
