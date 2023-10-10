@@ -42,29 +42,12 @@ class CCXT(AbstractProvider):
 			return None, None
 		esDocId = CCXT_TO_CACHE_MAP.get(exchange["id"])
 
-		if exchange["id"] == "binance":
-			ccxtInstance = ccxt.binance({
-				"proxies": {
-					"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-					"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
-				}
-			})
-		elif exchange["id"] == "binanceusdm":
-			ccxtInstance = ccxt.binanceusdm({
-				"proxies": {
-					"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-					"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
-				}
-			})
-		elif exchange["id"] == "binancecoinm":
-			ccxtInstance = ccxt.binancecoinm({
-				"proxies": {
-					"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-					"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
-				}
-			})
-		else:
-			ccxtInstance = getattr(ccxt, exchange["id"])()
+		ccxtInstance = getattr(ccxt, exchange["id"])({
+			"proxies": {
+				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+			}
+		})
 
 		tf, limitTimestamp, candleOffset = CCXT.get_highest_supported_timeframe(ccxtInstance, datetime.now().astimezone(timezone.utc))
 
@@ -229,29 +212,12 @@ class CCXT(AbstractProvider):
 		if exchange is None:
 			return None, None
 
-		if exchange["id"] == "binance":
-			ccxtInstance = ccxt.binance({
-				"proxies": {
-					"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-					"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
-				}
-			})
-		elif exchange["id"] == "binanceusdm":
-			ccxtInstance = ccxt.binanceusdm({
-				"proxies": {
-					"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-					"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
-				}
-			})
-		elif exchange["id"] == "binancecoinm":
-			ccxtInstance = ccxt.binancecoinm({
-				"proxies": {
-					"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-					"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
-				}
-			})
-		else:
-			ccxtInstance = getattr(ccxt, exchange["id"])()
+		ccxtInstance = getattr(ccxt, exchange["id"])({
+			"proxies": {
+				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+			}
+		})
 
 		try:
 			depthData = ccxtInstance.fetch_order_book(ticker.get("symbol"))
