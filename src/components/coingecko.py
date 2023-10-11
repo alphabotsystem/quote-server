@@ -15,10 +15,9 @@ class CoinGecko(AbstractProvider):
 
 	@classmethod
 	def _request_quote(cls, request, ticker):
-		preferences = request.get("preferences")
-		action = next((e.get("value") for e in preferences if e.get("id") == "lld"), None)
+		symbol = ticker.get("symbol")
 
-		if action == "dom":
+		if symbol.startswith("DOM:"):
 			try: rawData = CoinGecko.connection.get_global()
 			except: return None, f"Requested dominance data for `{ticker.get('name')}` is not available."
 			if ticker.get("base").lower() not in rawData["market_cap_percentage"]: return None, f"Dominance for {ticker.get('base')} does not exist."
@@ -42,7 +41,7 @@ class CoinGecko(AbstractProvider):
 
 		else:
 			try:
-				rawData = CoinGecko.connection.get_coin_by_id(id=ticker.get("symbol"), localization="false", tickers=False, market_data=True, community_data=False, developer_data=False)
+				rawData = CoinGecko.connection.get_coin_by_id(id=symbol, localization="false", tickers=False, market_data=True, community_data=False, developer_data=False)
 			except:
 				print(format_exc())
 				return None, None

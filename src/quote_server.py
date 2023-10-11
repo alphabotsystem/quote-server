@@ -11,6 +11,7 @@ from traceback import format_exc
 from google.cloud.error_reporting import Client as ErrorReportingClient
 
 from components.alternativeme import Alternativeme
+from components.blockchair import Blockchair
 from components.cnnbusiness import CNNBusiness
 from components.ccxt import CCXT
 from components.coingecko import CoinGecko
@@ -31,6 +32,8 @@ async def request_quote(request):
 
 		if platform == "Alternative.me":
 			payload, message = await loop.run_in_executor(None, Alternativeme.request_quote, currentRequest)
+		elif platform == "Blockchair":
+			payload, message = await loop.run_in_executor(None, Blockchair.request_quote, currentRequest)
 		elif platform == "CNN Business":
 			payload, message = await loop.run_in_executor(None, CNNBusiness.request_quote, currentRequest)
 		elif platform == "CoinGecko":

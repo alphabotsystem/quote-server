@@ -34,9 +34,7 @@ class CCXT(AbstractProvider):
 
 	@classmethod
 	def _request_quote(cls, request, ticker):
-		preferences = request.get("preferences")
-		action = next((e.get("value") for e in preferences if e.get("id") == "lld"), None)
-
+		symbol = ticker.get("symbol")
 		exchange = ticker["exchange"]
 		if not exchange:
 			return None, None
@@ -51,9 +49,9 @@ class CCXT(AbstractProvider):
 
 		tf, limitTimestamp, candleOffset = CCXT.get_highest_supported_timeframe(ccxtInstance, datetime.now().astimezone(timezone.utc))
 
-		if action == "funding":
+		if symbol.startswith("FUNDING:"):
 			try:
-				rawData = ccxtInstance.fetchFundingRate(ticker.get("symbol"))
+				rawData = ccxtInstance.fetchFundingRate(symbol)
 			except NotSupported:
 				return None, f"Funding is not supported by {exchange['name']}. The requested ticker is likely a spot market."
 			except:
@@ -87,9 +85,9 @@ class CCXT(AbstractProvider):
 			}
 			return payload, None
 
-		elif action == "oi":
+		elif symbol.startswith("OI:"):
 			try:
-				rawData = ccxtInstance.fetchOpenInterestHistory(ticker.get("symbol"), limit=1)
+				rawData = ccxtInstance.fetchOpenInterestHistory(symbol, limit=1)
 			except (NotSupported, BadSymbol):
 				return None, f"Funding is not supported by {exchange['name']}. The requested ticker is likely a spot market."
 			except:
@@ -115,7 +113,7 @@ class CCXT(AbstractProvider):
 			}
 			return payload, None
 
-		elif action == "ls":
+		elif symbol.startswith("LS:"):
 			if exchange["id"] == "bitfinex2":
 				try:
 					longs = ccxtInstance.publicGetStats1KeySizeSymbolLongLast({"key": "pos.size", "size": "1m", "symbol": f"t{ticker.get('id')}", "side": "long", "section": "last"})
@@ -173,7 +171,7 @@ class CCXT(AbstractProvider):
 
 		else:
 			try:
-				rawData = ccxtInstance.fetch_ohlcv(ticker.get("symbol"), timeframe=tf, since=limitTimestamp, limit=150)
+				rawData = ccxtInstance.fetch_ohlcv(symbol, timeframe=tf, since=limitTimestamp, limit=150)
 				if len(rawData) == 0 or rawData[-1][4] is None or rawData[0][1] is None: return None, None
 			except:
 				print(format_exc())
@@ -205,7 +203,7 @@ class CCXT(AbstractProvider):
 	@classmethod
 	def _request_depth(cls, request, ticker):
 		preferences = request.get("preferences")
-		action = next((e.get("value") for e in preferences if e.get("id") == "lld"), None)
+		action = next((e.get("value") for e in preferences if e.get("id") == "prefix"), None)
 		if action is not None: return None, "Support for lower level data like funding rates and open interest is not supported by the depth command."
 
 		exchange = ticker["exchange"]
