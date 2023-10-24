@@ -21,7 +21,8 @@ class Blockchair(AbstractProvider):
 
 		if tickerId.startswith("HALVING:"):
 			r = get("https://api.blockchair.com/tools/halvening").json()
-			rawData = r["data"][CCXT_TO_BLOCKCHAIR[ticker.get("base")]]
+			asset = CCXT_TO_BLOCKCHAIR[ticker.get("base")]
+			rawData = r["data"][asset]
 
 			halvingTime = datetime.strptime(rawData["halvening_time"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
 
