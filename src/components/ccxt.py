@@ -202,8 +202,8 @@ class CCXT(AbstractProvider):
 
 	@classmethod
 	def _request_depth(cls, request, ticker):
-		preferences = request.get("preferences")
-		action = next((e.get("value") for e in preferences if e.get("id") == "prefix"), None)
+		preferences = request["preferences"]
+		action = preferences.get("prefix")
 		if action is not None: return None, "Support for lower level data like funding rates and open interest is not supported by the depth command."
 
 		exchange = ticker["exchange"]
