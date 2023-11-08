@@ -59,13 +59,11 @@ class Twelvedata(AbstractProvider):
 			stockLogoThumbnail = static_storage.icon
 
 		price = rawData["close"].tolist()
-		volume = rawData["volume"].tolist()
 		priceChange = ((price[0] / price[1] - 1) * 100) if len(price) > 1 and price[1] != 0 else 0
 
 		priceText = "{:,.6f}".format(price[0]) if price[0] < 0.5 else "{:,.3f}".format(price[0])
 		payload = {
 			"quotePrice": priceText.rstrip('0').rstrip('.') + " " + ticker.get("quote"),
-			"quoteVolume": "{:,.4f}".format(volume[0]).rstrip('0').rstrip('.') + " " + ticker.get("base"),
 			"title": ticker.get("name"),
 			"change": "{:+.2f} %".format(priceChange),
 			"thumbnailUrl": stockLogoThumbnail,
@@ -74,10 +72,14 @@ class Twelvedata(AbstractProvider):
 			"platform": Twelvedata.name,
 			"raw": {
 				"quotePrice": price,
-				"quoteVolume": volume,
 				"timestamp": time()
 			}
 		}
+
+		if "volume" in rawData:
+			volume = rawData["volume"].tolist()
+			payload["quoteVolume"] = "{:,.4f}".format(volume[0]).rstrip('0').rstrip('.') + " " + ticker.get("base")
+			payload["raw"]["quoteVolume"] = volume
 
 		return payload, None
 
