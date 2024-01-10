@@ -107,12 +107,6 @@ class CoinGecko(AbstractProvider):
 			"description": description,
 			"rank": assetData["market_data"]["market_cap_rank"],
 			"supply": {},
-			"score": {
-				# "developer": assetData["developer_score"],
-				"community": assetData["community_score"],
-				"liquidity": assetData["liquidity_score"],
-				"public interest": assetData["public_interest_score"]
-			},
 			"price": {
 				"current": assetData["market_data"]["current_price"].get("usd"),
 				"ath": assetData["market_data"]["ath"].get("usd"),
