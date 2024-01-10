@@ -108,7 +108,7 @@ class CoinGecko(AbstractProvider):
 			"rank": assetData["market_data"]["market_cap_rank"],
 			"supply": {},
 			"score": {
-				"developer": assetData["developer_score"],
+				# "developer": assetData["developer_score"],
 				"community": assetData["community_score"],
 				"liquidity": assetData["liquidity_score"],
 				"public interest": assetData["public_interest_score"]
