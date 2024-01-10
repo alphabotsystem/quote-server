@@ -15,7 +15,6 @@ from components.blockchair import Blockchair
 from components.cnnbusiness import CNNBusiness
 from components.ccxt import CCXT
 from components.coingecko import CoinGecko
-from components.iexc import IEXC
 from components.twelvedata import Twelvedata
 
 
@@ -58,8 +57,6 @@ async def request_depth(request):
 
 		if platform == "CCXT":
 			payload, message = await loop.run_in_executor(None, CCXT.request_depth, currentRequest)
-		elif platform == "Twelvedata":
-			payload, message = await loop.run_in_executor(None, IEXC.request_depth, currentRequest)
 
 		if bool(payload):
 			return {"response": payload, "message": message}
