@@ -57,7 +57,7 @@ class CoinGecko(AbstractProvider):
 			priceText = "{:,.8g}".format(price)
 			if price < 1 and "e-" in priceText:
 				number, exponent = priceText.split("e-", 1)
-				priceText = ("{:,.%df}" % (len(number) + int(exponent) - 2)).format(price).rstrip('0')
+				priceText = ("{:,.%df}" % (len(number) + int(exponent))).format(price).rstrip('0')
 
 			payload = {
 				"quotePrice": priceText + " " + ticker.get("quote"),
