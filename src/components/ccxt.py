@@ -49,7 +49,7 @@ class CCXT(AbstractProvider):
 
 		tf, limitTimestamp, candleOffset = CCXT.get_highest_supported_timeframe(ccxtInstance, datetime.now().astimezone(timezone.utc))
 
-		if symbol.startswith("FUNDING:"):
+		if symbol.endswith(".FUNDING"):
 			try:
 				rawData = ccxtInstance.fetchFundingRate(symbol)
 			except NotSupported:
@@ -85,7 +85,7 @@ class CCXT(AbstractProvider):
 			}
 			return payload, None
 
-		elif symbol.startswith("OI:"):
+		elif symbol.endswith(".OI"):
 			try:
 				rawData = ccxtInstance.fetchOpenInterestHistory(symbol, limit=1)
 			except (NotSupported, BadSymbol):
@@ -113,7 +113,7 @@ class CCXT(AbstractProvider):
 			}
 			return payload, None
 
-		elif symbol.startswith("LS:"):
+		elif symbol.endswith(".LS"):
 			if exchange["id"] == "bitfinex2":
 				try:
 					longs = ccxtInstance.publicGetStats1KeySizeSymbolLongLast({"key": "pos.size", "size": "1m", "symbol": f"t{ticker.get('id')}", "side": "long", "section": "last"})
