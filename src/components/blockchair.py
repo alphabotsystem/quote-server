@@ -19,7 +19,7 @@ class Blockchair(AbstractProvider):
 	def _request_quote(cls, request, ticker):
 		tickerId = ticker.get("id")
 
-		if tickerId.startswith("HALVING:"):
+		if tickerId.endswith(".HALVING"):
 			r = get("https://api.blockchair.com/tools/halvening").json()
 			asset = CCXT_TO_BLOCKCHAIR[ticker.get("base")]
 			rawData = r["data"][asset]

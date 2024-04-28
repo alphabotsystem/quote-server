@@ -26,8 +26,8 @@ class CoinGecko(AbstractProvider):
 			coinThumbnail = static_storage.icon if ticker.get("image") is None else ticker.get("image")
 
 			payload = {
-				"quotePrice": "{} dominance: {:,.2f} %".format(ticker.get("base"), coinDominance),
-				"title": "Market Dominance",
+				"quotePrice": "{:,.2f} %".format(coinDominance),
+				"title": f"{ticker.get('name')} market dominance",
 				"thumbnailUrl": coinThumbnail,
 				"messageColor": "deep purple",
 				"sourceText": "Market information from CoinGecko",
