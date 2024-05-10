@@ -18,7 +18,6 @@ class Chain(AbstractProvider):
 
 		try:
 			url = f"https://pro-api.coingecko.com/api/v3/onchain/networks/{exchange.get('id', 'eth')}/pools/{symbol}"
-			print(url)
 			response = requests.get(url, headers={"accept": "application/json", "x-cg-pro-api-key": environ["COINGECKO_API_KEY"]})
 			rawData = loads(response.text)
 		except:
@@ -30,6 +29,9 @@ class Chain(AbstractProvider):
 		volume = rawData["data"]["attributes"]["volume_usd"]["h24"]
 		priceChange = rawData["data"]["attributes"]["price_change_percentage"]["h24"]
 
+		priceText = "{:,.8g}".format(float(price))
+		rawPriceText = "{:,.12g}".format(float(rawPrice))
+
 		name = rawData["data"]["attributes"]["name"]
 		if name.count(" / ") == 1:
 			base, rest = name.split(" / ")
@@ -38,8 +40,8 @@ class Chain(AbstractProvider):
 			base, quote = "", ""
 
 		payload = {
-			"quotePrice": price + " USD",
-			"quoteConvertedPrice": rawPrice + " " + quote,
+			"quotePrice": priceText + " USD",
+			"quoteConvertedPrice": rawPriceText + " " + quote,
 			"quoteVolume": volume + " USD",
 			"title": name,
 			"change": priceChange + " %",
