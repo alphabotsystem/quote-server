@@ -15,6 +15,7 @@ from components.blockchair import Blockchair
 from components.cnnbusiness import CNNBusiness
 from components.ccxt import CCXT
 from components.coingecko import CoinGecko
+from components.chain import Chain
 from components.twelvedata import Twelvedata
 
 
@@ -37,6 +38,8 @@ async def request_quote(request):
 			payload, message = await loop.run_in_executor(None, CNNBusiness.request_quote, currentRequest)
 		elif platform == "CoinGecko":
 			payload, message = await loop.run_in_executor(None, CoinGecko.request_quote, currentRequest)
+		elif platform == "On-Chain":
+			payload, message = await loop.run_in_executor(None, Chain.request_quote, currentRequest)
 		elif platform == "CCXT":
 			payload, message = await loop.run_in_executor(None, CCXT.request_quote, currentRequest)
 		elif platform == "Twelvedata":

@@ -12,7 +12,6 @@ from elasticsearch import Elasticsearch
 from components.abstract import AbstractProvider
 import ccxt
 from ccxt.base.errors import NotSupported, BadSymbol
-from components.coingecko import CoinGecko
 from assets import static_storage
 
 
