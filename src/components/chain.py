@@ -24,13 +24,10 @@ class Chain(AbstractProvider):
 			print(format_exc())
 			return None, None
 
-		price = rawData["data"]["attributes"]["base_token_price_usd"]
-		rawPrice = rawData["data"]["attributes"]["base_token_price_native_currency"]
+		price = rawData["data"]["attributes"]["base_token_price_usd"][:10]
+		rawPrice = rawData["data"]["attributes"]["base_token_price_native_currency"][:14]
 		volume = rawData["data"]["attributes"]["volume_usd"]["h24"]
 		priceChange = rawData["data"]["attributes"]["price_change_percentage"]["h24"]
-
-		priceText = "{:,.8g}".format(float(price))
-		rawPriceText = "{:,.12g}".format(float(rawPrice))
 
 		name = rawData["data"]["attributes"]["name"]
 		if name.count(" / ") == 1:
@@ -40,8 +37,8 @@ class Chain(AbstractProvider):
 			base, quote = "", ""
 
 		payload = {
-			"quotePrice": priceText + " USD",
-			"quoteConvertedPrice": rawPriceText + " " + quote,
+			"quotePrice": price + " USD",
+			"quoteConvertedPrice": rawPrice + " " + quote,
 			"quoteVolume": volume + " USD",
 			"title": name,
 			"change": priceChange + " %",
