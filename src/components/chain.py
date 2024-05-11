@@ -40,7 +40,7 @@ class Chain(AbstractProvider):
 			"quotePrice": price + " USD",
 			"quoteConvertedPrice": rawPrice + " " + quote,
 			"quoteVolume": volume + " USD",
-			"title": name,
+			"title": base + quote,
 			"change": priceChange + " %",
 			"messageColor": "amber" if float(priceChange) == 0 else ("green" if float(priceChange) > 0 else "red"),
 			"sourceText": f"{ticker['id']} on-chain",
