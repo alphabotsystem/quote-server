@@ -226,13 +226,15 @@ class CCXT(AbstractProvider):
 
 		imageData = b64encode(CCXT._generate_depth_image(depthData, bestBid, bestAsk, lastPrice))
 
-		# imageBuffer = BytesIO()
-		# chartImage = Image.new("RGBA", (1600, 1200))
-		# chartImage.paste(CCXT._generate_depth_image(depthData, bestBid, bestAsk, lastPrice))
-		# chartImage = Image.alpha_composite(chartImage, CCXT.chartOverlay["normal"])
-		# chartImage.save(imageBuffer, format="png")
-		# imageData = b64encode(imageBuffer.getvalue())
-		# imageBuffer.close()
+		if request["origin"] in ["1239226999227154574"]:
+			logo = Image.open(f"../assets/{request['origin']}logo.png")
+			imageBuffer = BytesIO()
+			chartImage = Image.new("RGBA", (1600, 1200))
+			chartImage.paste(CCXT._generate_depth_image(depthData, bestBid, bestAsk, lastPrice))
+			chartImage = Image.alpha_composite(chartImage, logo)
+			chartImage.save(imageBuffer, format="png")
+			imageData = b64encode(imageBuffer.getvalue())
+			imageBuffer.close()
 
 		payload = {
 			"data": imageData.decode(),
