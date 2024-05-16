@@ -200,7 +200,7 @@ class CCXT(AbstractProvider):
 			return payload, None
 
 	@classmethod
-	def _request_depth(cls, request, ticker):
+	def _request_depth(cls, request, origin, ticker):
 		preferences = request["preferences"]
 		action = preferences.get("prefix")
 		if action is not None: return None, "Support for lower level data like funding rates and open interest is not supported by the depth command."
@@ -226,7 +226,7 @@ class CCXT(AbstractProvider):
 
 		imageData = b64encode(CCXT._generate_depth_image(depthData, bestBid, bestAsk, lastPrice))
 
-		if request["origin"] in ["1239226999227154574"]:
+		if origin in ["1239226999227154574"]:
 			logo = Image.open(f"../assets/{request['origin']}logo.png")
 			imageBuffer = BytesIO()
 			chartImage = Image.new("RGBA", (1600, 1200))

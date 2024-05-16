@@ -54,12 +54,13 @@ async def request_quote(request):
 
 async def request_depth(request):
 	payload, finalMessage, message = {}, None, None
+	origin = request["origin"]
 
 	for platform in request["platforms"]:
 		currentRequest = request.get(platform)
 
 		if platform == "CCXT":
-			payload, message = await loop.run_in_executor(None, CCXT.request_depth, currentRequest)
+			payload, message = await loop.run_in_executor(None, CCXT.request_depth, currentRequest, origin)
 
 		if bool(payload):
 			return {"response": payload, "message": message}

@@ -86,7 +86,7 @@ class AbstractProvider(object):
 		raise NotImplementedError
 
 	@classmethod
-	def request_depth(cls, request, **kwargs):
+	def request_depth(cls, request, origin, **kwargs):
 		ticker = request.get("ticker")
 		tree = ticker.pop("tree")
 		if tree is None: return None, None
@@ -95,15 +95,15 @@ class AbstractProvider(object):
 
 		if not ticker.get("isSimple"):
 			payload = {}
-			quoteMessage = "Aggregated depth chart is not available yet."
+			quoteMessage = "Aggregated depth charts are not available."
 		else:
-			[payload, quoteMessage] = cls._request_depth(request, ticker, **kwargs)
+			[payload, quoteMessage] = cls._request_depth(request, origin, ticker, **kwargs)
 
 		return payload, quoteMessage
 
 	@classmethod
 	@abstractmethod
-	def _request_depth(cls, request, ticker, **kwargs):
+	def _request_depth(cls, request, origin, ticker, **kwargs):
 		raise NotImplementedError
 
 	@classmethod
