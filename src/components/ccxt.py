@@ -227,7 +227,7 @@ class CCXT(AbstractProvider):
 		imageData = b64encode(CCXT._generate_depth_image(depthData, bestBid, bestAsk, lastPrice))
 
 		if origin in ["1239226999227154574"]:
-			logo = Image.open(f"../assets/{origin}logo.png")
+			logo = Image.open(f"../assets/{origin}/logo.png")
 			imageBuffer = BytesIO()
 			chartImage = Image.new("RGBA", (1600, 1200))
 			chartImage.paste(CCXT._generate_depth_image(depthData, bestBid, bestAsk, lastPrice))
