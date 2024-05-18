@@ -225,9 +225,12 @@ class CCXT(AbstractProvider):
 			return None, None
 
 		if origin in ["1239226999227154574"]:
-			logo = Image.open(f"assets/overlays/{origin}/logo.png").convert("RGBA")
+			imageSize = (1600, 1200)
+			logo = Image.open(f"assets/overlays/{origin}/logo.png").convert("RGBA").resize((64, 64), Image.ANTIALIAS)
+			logo = Image.new('RGBA', imageSize, (0, 0, 0, 0)).paste(scaled_image, (32, 1104))
+
 			imageBuffer = BytesIO()
-			chartImage = Image.new("RGBA", (1600, 1200))
+			chartImage = Image.new("RGBA", imageSize)
 			chartImage.paste(Image.open(CCXT._generate_depth_image(depthData, bestBid, bestAsk, lastPrice)))
 			chartImage = Image.alpha_composite(chartImage, logo)
 			chartImage.save(imageBuffer, format="png")
