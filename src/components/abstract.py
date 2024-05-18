@@ -178,7 +178,7 @@ class AbstractProvider(object):
 		plt.savefig(rawImageData, format="png", edgecolor="none")
 		plt.close(fig)
 		rawImageData.seek(0)
-		return rawImageData.getvalue()
+		return rawImageData
 
 	@v_args(inline=True)
 	class CalculateTree(Transformer):
