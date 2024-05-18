@@ -230,7 +230,7 @@ class CCXT(AbstractProvider):
 			logo = Image.open(f"assets/overlays/{origin}/logo.png").convert("RGBA")
 			imageBuffer = BytesIO()
 			chartImage = Image.new("RGBA", (1600, 1200))
-			chartImage.paste(CCXT._generate_depth_image(depthData, bestBid, bestAsk, lastPrice))
+			chartImage.paste(Image.open(CCXT._generate_depth_image(depthData, bestBid, bestAsk, lastPrice)))
 			chartImage = Image.alpha_composite(chartImage, logo)
 			chartImage.save(imageBuffer, format="png")
 			imageData = b64encode(imageBuffer.getvalue())

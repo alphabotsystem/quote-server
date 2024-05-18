@@ -178,7 +178,6 @@ class AbstractProvider(object):
 		plt.savefig(rawImageData, format="png", edgecolor="none")
 		plt.close(fig)
 		rawImageData.seek(0)
-		# return Image.open(rawImageData)
 		return rawImageData.getvalue()
 
 	@v_args(inline=True)
