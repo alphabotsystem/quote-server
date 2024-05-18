@@ -226,7 +226,7 @@ class CCXT(AbstractProvider):
 
 		if origin in ["1239226999227154574"]:
 			imageSize = (1600, 1200)
-			logo = Image.open(f"assets/overlays/{origin}/logo.png").convert("RGBA").resize((64, 64), Image.ANTIALIAS)
+			logo = Image.open(f"assets/overlays/{origin}/logo.png").convert("RGBA").resize((64, 64), Image.Resampling.LANCZOS)
 			logo = Image.new('RGBA', imageSize, (0, 0, 0, 0)).paste(scaled_image, (32, 1104))
 
 			imageBuffer = BytesIO()
