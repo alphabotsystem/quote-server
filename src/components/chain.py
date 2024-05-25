@@ -19,17 +19,17 @@ class Chain(AbstractProvider):
 		try:
 			url = f"https://pro-api.coingecko.com/api/v3/onchain/networks/{exchange.get('id', 'eth')}/pools/{symbol}"
 			response = requests.get(url, headers={"accept": "application/json", "x-cg-pro-api-key": environ["COINGECKO_API_KEY"]})
-			rawData = loads(response.text)
+			rawData = loads(response.text)["data"]["attributes"]
 		except:
 			print(format_exc())
 			return None, None
 
-		price = rawData["data"]["attributes"]["base_token_price_usd"][:10]
-		rawPrice = rawData["data"]["attributes"]["base_token_price_native_currency"][:14]
-		volume = rawData["data"]["attributes"]["volume_usd"]["h24"]
-		priceChange = rawData["data"]["attributes"]["price_change_percentage"]["h24"]
+		price = rawData["base_token_price_usd"][:10]
+		rawPrice = rawData["base_token_price_native_currency"][:14]
+		volume = rawData["volume_usd"]["h24"]
+		priceChange = rawData["price_change_percentage"]["h24"]
 
-		name = rawData["data"]["attributes"]["name"]
+		name = rawData["name"]
 		if name.count(" / ") == 1:
 			base, rest = name.split(" / ")
 			quote = rest.split(" ")[0]
