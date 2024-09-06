@@ -21,6 +21,7 @@ elasticsearch = Elasticsearch(
 )
 
 
+PROXY_BLACKLIST = ["htx"]
 CCXT_TO_CACHE_MAP = {
 	"binance": "binance:s:",
 	"binanceusdm": "binance:f:",
@@ -39,12 +40,15 @@ class CCXT(AbstractProvider):
 			return None, None
 		esDocId = CCXT_TO_CACHE_MAP.get(exchange["id"])
 
-		ccxtInstance = getattr(ccxt, exchange["id"])({
-			"proxies": {
-				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
-			}
-		})
+		if exchange["id"] in PROXY_BLACKLIST:
+			ccxtInstance = getattr(ccxt, exchange["id"])()
+		else:
+			ccxtInstance = getattr(ccxt, exchange["id"])({
+				"proxies": {
+					"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
+					"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				}
+			})
 
 		tf, limitTimestamp, candleOffset = CCXT.get_highest_supported_timeframe(ccxtInstance, datetime.now().astimezone(timezone.utc))
 
