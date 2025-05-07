@@ -45,8 +45,8 @@ class CCXT(AbstractProvider):
 		else:
 			ccxtInstance = getattr(ccxt, exchange["id"])({
 				"proxies": {
-					"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-					"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+					"http": f"http://{environ['PROXY_IP']}",
+					"https": f"http://{environ['PROXY_IP']}"
 				}
 			})
 
@@ -215,8 +215,8 @@ class CCXT(AbstractProvider):
 
 		ccxtInstance = getattr(ccxt, exchange["id"])({
 			"proxies": {
-				"http": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}",
-				"https": f"http://{environ['PROXY_AUTH']}@{environ['PROXY_IP']}"
+				"http": f"http://{environ['PROXY_IP']}",
+				"https": f"http://{environ['PROXY_IP']}"
 			}
 		})
 
