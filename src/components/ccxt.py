@@ -1,12 +1,9 @@
 from os import environ
 from time import time
-from io import BytesIO
 from math import ceil
 from datetime import datetime, timezone
-from base64 import decodebytes, b64encode
 from traceback import format_exc
 
-from PIL import Image
 from elasticsearch import Elasticsearch
 
 from components.abstract import AbstractProvider
@@ -202,56 +199,6 @@ class CCXT(AbstractProvider):
 			}
 
 			return payload, None
-
-	@classmethod
-	def _request_depth(cls, request, origin, ticker):
-		preferences = request["preferences"]
-		action = preferences.get("prefix")
-		if action is not None: return None, "Support for lower level data like funding rates and open interest is not supported by the depth command."
-
-		exchange = ticker["exchange"]
-		if exchange is None:
-			return None, None
-
-		ccxtInstance = getattr(ccxt, exchange["id"])({
-			"proxies": {
-				"http": f"http://{environ['PROXY_IP']}",
-				"https": f"http://{environ['PROXY_IP']}"
-			}
-		})
-
-		try:
-			depthData = ccxtInstance.fetch_order_book(ticker.get("symbol"))
-			bestBid = depthData["bids"][0]
-			bestAsk = depthData["asks"][0]
-			lastPrice = (bestBid[0] + bestAsk[0]) / 2
-		except:
-			return None, None
-
-		if origin in ["1239226999227154574"]:
-			imageSize = (1600, 1200)
-			logo = Image.open(f"assets/overlays/{origin}/logo.png").convert("RGBA").resize((64, 64), Image.Resampling.LANCZOS)
-			overlay = Image.new('RGBA', imageSize, (0, 0, 0, 0))
-			overlay.paste(logo, (32, 1104))
-
-			imageBuffer = BytesIO()
-			chartImage = Image.new("RGBA", imageSize)
-			chartImage.paste(Image.open(CCXT._generate_depth_image(depthData, bestBid, bestAsk, lastPrice)))
-			chartImage = Image.alpha_composite(chartImage, overlay)
-			chartImage.save(imageBuffer, format="png")
-			imageData = imageBuffer.getvalue()
-			imageBuffer.close()
-		else:
-			imageData = CCXT._generate_depth_image(depthData, bestBid, bestAsk, lastPrice).getvalue()
-
-		payload = {
-			"data": b64encode(imageData).decode(),
-			"width": 1600,
-			"height": 1200,
-			"platform": "CCXT"
-		}
-
-		return payload, None
 
 	@staticmethod
 	def get_highest_supported_timeframe(exchange, n):

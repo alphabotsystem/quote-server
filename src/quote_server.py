@@ -52,23 +52,6 @@ async def request_quote(request):
 
 	return {"response": None, "message": finalMessage}
 
-async def request_depth(request):
-	payload, finalMessage, message = {}, None, None
-	origin = request["origin"]
-
-	for platform in request["platforms"]:
-		currentRequest = request.get(platform)
-
-		if platform == "CCXT":
-			payload, message = await loop.run_in_executor(None, CCXT.request_depth, currentRequest, origin)
-
-		if bool(payload):
-			return {"response": payload, "message": message}
-		elif message is not None:
-			finalMessage = message
-
-	return {"response": None, "message": finalMessage}
-
 async def request_detail(request):
 	payload, finalMessage, message = {}, None, None
 
@@ -91,11 +74,6 @@ async def request_detail(request):
 async def run(req: Request):
 	request = await req.json()
 	return await request_quote(request)
-
-@app.post("/depth")
-async def run(req: Request):
-	request = await req.json()
-	return await request_depth(request)
 
 @app.post("/detail")
 async def run(req: Request):
